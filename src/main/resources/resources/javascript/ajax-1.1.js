@@ -159,6 +159,9 @@ function ajax(parameters) {
 		}
 	}
 
+//	request.setRequestHeader("Connection", "close");
+	request.setRequestHeader("Accept", "application/json, text/html");
+	
 	// need to add these headers for post
 	if (parameters.method == "POST" || parameters.method.toUpperCase() == "PUT" || parameters.method.toUpperCase() == "DELETE") {
 		// if we are sending an object as data, jsonify it
@@ -168,7 +171,6 @@ function ajax(parameters) {
 		}
 		request.setRequestHeader("Content-Type", parameters.contentType ? parameters.contentType : "application/x-www-form-urlencoded");
 		request.setRequestHeader("Content-Length", parameters.data.length);
-		request.setRequestHeader("Connection", "close");
 	}
 	else {
 		parameters.data = null;
