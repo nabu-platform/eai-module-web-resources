@@ -26,9 +26,10 @@ public class WebArtifactContextMenu implements EntryContextMenuProvider {
 			Menu menu = new Menu("Web Resources");
 			try {
 				final ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PUBLIC + "/resources/javascript");
-				menu.getItems().add(newMenuItem("Ajax v1.1", "resources/javascript/ajax-1.1.js", javascript));
-				menu.getItems().add(newMenuItem("D3 v3.5.12", "resources/javascript/d3-3.5.12.js", javascript));
-				menu.getItems().add(newMenuItem("Chart JS v1.0.2", "resources/javascript/chart-1.0.2.js", javascript));
+				menu.getItems().add(newMenuItem("Ajax v1.1", javascript, "resources/javascript/ajax-1.1.js"));
+				menu.getItems().add(newMenuItem("D3 v3.5.12", javascript, "resources/javascript/d3-3.5.12.js"));
+				menu.getItems().add(newMenuItem("Chart JS v1.0.2", javascript, "resources/javascript/chart-1.0.2.js"));
+				menu.getItems().add(newMenuItem("Vue JS v1.0.13", javascript, "resources/javascript/vue-1.0.13.js", "resources/javascript/vue-router-0.7.7.js"));
 				return menu;
 			}
 			catch (Exception e) {
@@ -38,29 +39,31 @@ public class WebArtifactContextMenu implements EntryContextMenuProvider {
 		return null;
 	}
 
-	private MenuItem newMenuItem(String name, final String path, final ManageableContainer<?> target) {
+	private MenuItem newMenuItem(String name, final ManageableContainer<?> target, final String...paths) {
 		MenuItem item = new MenuItem(name);
 		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
 				try {
-					String fileName = path.replaceAll("^.*?/([^/]+)$", "$1");
-					Resource child = target.getChild(fileName);
-					if (child == null) {
-						child = target.create(fileName, "application/javascript");
-					}
-					ReadableContainer<ByteBuffer> readable = IOUtils.wrap(EAIResourceRepository.getInstance().getMavenResource(path));
-					try {
-						WritableContainer<ByteBuffer> writable = ((WritableResource) child).getWritable();
+					for (String path : paths) {
+						String fileName = path.replaceAll("^.*?/([^/]+)$", "$1");
+						Resource child = target.getChild(fileName);
+						if (child == null) {
+							child = target.create(fileName, "application/javascript");
+						}
+						ReadableContainer<ByteBuffer> readable = IOUtils.wrap(EAIResourceRepository.getInstance().getMavenResource(path));
 						try {
-							IOUtils.copyBytes(readable, writable);
+							WritableContainer<ByteBuffer> writable = ((WritableResource) child).getWritable();
+							try {
+								IOUtils.copyBytes(readable, writable);
+							}
+							finally {
+								writable.close();
+							}
 						}
 						finally {
-							writable.close();
+							readable.close();
 						}
-					}
-					finally {
-						readable.close();
 					}
 				}
 				catch (Exception e) {
