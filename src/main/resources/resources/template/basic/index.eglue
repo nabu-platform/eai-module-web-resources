@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<title>My App</title>
+${{
+# Include all the javascript files
+for (script : nabu.artifacts.Web.resources(environment("webArtifactId"), ".*\.js")/resources)
+	echo("\t\t<script src='" + server.root() + "/" + script + "' type='text/javascript'></script>\n")
+
+# Include all the css files
+for (css : nabu.artifacts.Web.resources(environment("webArtifactId"), ".*\.css")/resources)
+	echo("\t\t<link rel='stylesheet' type='text/css' href='" + server.root() + "/" + css + "'/>\n")
+}}
+	</head>
+	<body onload="initialize()">
+		<div class="navigation">
+			<a href="${server.root()}/login">Log In</a>
+			<a href="${server.root()}/logout">Log Out</a>
+		</div>
+		<div id="content"></div>
+	</body>
+</html>
