@@ -1,4 +1,4 @@
-package be.nabu.eai.module.webartifact.resources;
+package be.nabu.eai.module.web.resources;
 
 import java.net.URLConnection;
 
@@ -7,11 +7,11 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import be.nabu.eai.developer.api.EntryContextMenuProvider;
-import be.nabu.eai.module.web.module.WebModule;
+import be.nabu.eai.module.web.application.WebApplication;
+import be.nabu.eai.module.web.component.WebComponent;
 import be.nabu.eai.repository.EAIResourceRepository;
 import be.nabu.eai.repository.api.Entry;
 import be.nabu.eai.repository.api.ResourceEntry;
-import be.nabu.eai.repository.artifacts.web.WebArtifact;
 import be.nabu.libs.resources.ResourceUtils;
 import be.nabu.libs.resources.api.ManageableContainer;
 import be.nabu.libs.resources.api.Resource;
@@ -21,11 +21,11 @@ import be.nabu.utils.io.api.ByteBuffer;
 import be.nabu.utils.io.api.ReadableContainer;
 import be.nabu.utils.io.api.WritableContainer;
 
-public class WebArtifactContextMenu implements EntryContextMenuProvider {
+public class WebComponentContextMenu implements EntryContextMenuProvider {
 
 	@Override
 	public MenuItem getContext(Entry entry) {
-		if (entry instanceof ResourceEntry && entry.isNode() && (WebArtifact.class.isAssignableFrom(entry.getNode().getArtifactClass()) || WebModule.class.isAssignableFrom(entry.getNode().getArtifactClass()))) {
+		if (entry instanceof ResourceEntry && entry.isNode() && (WebApplication.class.isAssignableFrom(entry.getNode().getArtifactClass()) || WebComponent.class.isAssignableFrom(entry.getNode().getArtifactClass()))) {
 			Menu menu = new Menu("Web Resources");
 			try {
 				ManageableContainer<?> publicDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PUBLIC);
@@ -34,6 +34,7 @@ public class WebArtifactContextMenu implements EntryContextMenuProvider {
 				menu.getItems().add(newMenuItem("D3 v3.5.12", javascript, "resources/javascript/d3-3.5.12.js"));
 				menu.getItems().add(newMenuItem("Chart JS v1.0.2", javascript, "resources/javascript/chart-1.0.2.js"));
 				menu.getItems().add(newMenuItem("Vue JS v1.0.13", javascript, "resources/javascript/vue-1.0.13.js", "resources/javascript/vue-router-0.7.7.js"));
+				menu.getItems().add(newMenuTemplateItem("Chartist v0.9.5", publicDirectory, "resources/javascript/chartist-0.9.5.js", "resources/css/chartist-0.9.5.css"));
 				
 				Menu templates = new Menu("Templates");
 				templates.getItems().add(newMenuTemplateItem("Basic", publicDirectory, "resources/template/basic/index.eglue", "resources/template/basic/main.js", "resources/template/basic/main.css"));
