@@ -1,0 +1,21 @@
+if (environment("mobile") != true)
+	response.header("Content-Type", "application/javascript")
+
+resources = array(
+	"application.js",
+	"routes.js")
+
+for (resource : resources)
+	if (resource ~ ".*\.js")
+		echo(string(resource) + "\n")
+
+switch (environment("mobile"))
+	case(true)
+		echo(string("mobile.js"))
+	default
+		echo(string("web.js"))
+		
+# Add the component javascript
+for (resource : resources("index"))
+	if (resource ~ ".*\.js")
+		echo(string(resource(resource, "index")) + "\n")

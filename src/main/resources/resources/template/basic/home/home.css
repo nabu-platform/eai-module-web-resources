@@ -1,0 +1,15 @@
+[template="home"] {
+	/* Home specific stuff */
+}
+
+[template="home"] #header {
+	/* Home header specific stuff */
+}
+
+[template="home"] #main {
+	/* Home main specific stuff */
+}
+
+[template="home"] #footer {
+	/* Home footer specific stuff */
+}

@@ -1,0 +1,16 @@
+switch (environment("mobile"))
+	case(true)
+		echo(string(resource("mobile.css")))
+	default
+		response.header("Content-Type", "text/css")
+		echo(string(resource("web.css")))
+
+for (resource : resources())
+	if (resource ~ ".*\.css" && resource != "web.css" && resource != "mobile.css" && resource != "media.css")
+		echo(string(resource(resource)) + "\n")
+		
+for (resource : resources("index"))
+	if (resource ~ ".*\.css")
+		echo(string(resource(resource, "index")) + "\n")
+
+echo(string(resource("media.css")))
