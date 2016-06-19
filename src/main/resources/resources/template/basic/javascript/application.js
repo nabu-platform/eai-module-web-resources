@@ -1,5 +1,8 @@
 var application = {
-	configuration: {},
+	configuration: {
+		url: "${environment('url', 'http://127.0.0.1')}",
+		host: "${environment('host', '127.0.0.1')}"
+	},
 	services: {
 		router: new nabu.services.VueRouter({
 			useHash: true,
@@ -28,3 +31,10 @@ var application = {
 		}
 	}
 };
+Vue.mixin({
+	computed: {
+		$application: function() {
+			return application;
+		}
+	}
+});

@@ -1,11 +1,11 @@
 <template id="home">
-	<anchor id="header">
+	<div id="header">
 		The header!
-	</anchor>
-	<anchor id="main">
+	</div>
+	<div id="main">
 		The body!
-	</anchor>
-	<anchor id="footer">
+	</div>
+	<div id="footer">
 		The footer!
-	</anchor>
+	</div>
 </template>
