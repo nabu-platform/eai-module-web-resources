@@ -6,14 +6,15 @@ switch (environment("mobile"))
 	case(true)
 		echo(string(resource("mobile.css")))
 		# Inject platform specific code if applicable
-		resource = resource("mobile-" + environment("platform") + ".css")
-		if (resource != null)
-			echo(string(resource))
+		platformSpecific = "mobile-" + environment("platform") + ".css"
+		if (contains(platformSpecific, resources()))
+			echo(string(resource(platformSpecific)))
 		# Inject platform-version specific code if applicable
 		if (environment("platformVersion") != null)
-			resource = resource("mobile-" + environment("platform") + "-" + environment("platformVersion") + ".css")
-			if (resource != null)
-				echo(string(resource))
+			platformSpecific = "mobile-" + environment("platform") + "-" + environment("platformVersion") + ".css"
+			console("Checking " + platformSpecific + " in " + tuple(resources()) + " - " + contains(platformSpecific, resources()))
+			if (contains(platformSpecific, resources()))
+				echo(string(resource(platformSpecific)))
 	default
 		response.header("Content-Type", "text/css")
 		echo(string(resource("web.css")))
