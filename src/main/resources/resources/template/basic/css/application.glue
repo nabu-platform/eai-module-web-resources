@@ -1,26 +1,26 @@
 for (resource : resources())
 	if (resource ~ ".*\.css" && resource != "web.css" && resource !~ "mobile.*\.css" && resource != "media.css")
-		echo(string(resource(resource)) + "\n")
+		echo(resource(resource), "\n")
 
 switch (environment("mobile"))
 	case(true)
-		echo(string(resource("mobile.css")))
+		echo(resource("mobile.css"))
 		# Inject platform specific code if applicable
 		platformSpecific = "mobile-" + environment("platform") + ".css"
 		if (contains(platformSpecific, resources()))
-			echo(string(resource(platformSpecific)))
+			echo(resource(platformSpecific))
 		# Inject platform-version specific code if applicable
 		if (environment("platformVersion") != null)
 			platformSpecific = "mobile-" + environment("platform") + "-" + environment("platformVersion") + ".css"
 			console("Checking " + platformSpecific + " in " + tuple(resources()) + " - " + contains(platformSpecific, resources()))
 			if (contains(platformSpecific, resources()))
-				echo(string(resource(platformSpecific)))
+				echo(resource(platformSpecific))
 	default
 		response.header("Content-Type", "text/css")
-		echo(string(resource("web.css")))
+		echo(resource("web.css"))
 	
 for (resource : resources("index"))
 	if (resource ~ ".*\.css")
-		echo(string(resource(resource, "index")) + "\n")
+		echo(resource(resource, "index"), "\n")
 
-echo(string(resource("media.css")))
+echo(resource("media.css"))

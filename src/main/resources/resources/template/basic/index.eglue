@@ -18,7 +18,7 @@ if (environment("mobile") == true)
 ${{
 for (resource : resources())
 	if (resource ~ ".*\.tpl")
-		echo(string(resource))
+		echo(resource(resource))
 		
 nabu.components("tpl")
 }}
