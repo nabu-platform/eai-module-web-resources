@@ -2,7 +2,6 @@ package be.nabu.eai.module.web.resources;
 
 import java.io.IOException;
 import java.net.URLConnection;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +45,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				Menu templates = new Menu("Templates");
 //				templates.getItems().add(newMenuTemplateItem(entry.getRepository(), "Basic", publicDirectory, "resources/template/basic/index.eglue", "resources/template/basic/main.js", "resources/template/basic/main.css"));
 				templates.getItems().add(newBasicTemplate(entry, publicDirectory));
+				templates.getItems().add(newManagementTemplate(entry));
 				menu.getItems().add(templates);
 				return menu;
 			}
@@ -54,6 +54,68 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			}
 		}
 		return null;
+	}
+	
+	private MenuItem newManagementTemplate(Entry entry) throws IOException {
+		MenuItem item = new MenuItem("Management Module");
+		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					ManageableContainer<?> privateDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PRIVATE);
+					String name;
+					if (entry.getId().startsWith("nabu.management.")) {
+						name = entry.getId().replaceAll("^nabu.management\\.([^.]+)\\..*", "$1");
+					}
+					else {
+						name = entry.getId().replaceAll("^([^.]+)\\..*", "$1");
+					}
+					String fullName = "nabu.management.component." + name;
+					ManageableContainer<?> gcss = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "scripts/nabu/management/component/" + name + "/gcss");
+					ManageableContainer<?> tpl = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "scripts/nabu/management/component/" + name + "/tpl");
+					ManageableContainer<?> js = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "scripts/nabu/management/component/" + name + "/js");
+					
+					writeFile(gcss, "component.gcss", "for (resource : resources(\"" + fullName + ".tpl.component\"))\n" + 
+							"	if (resource ~ \".*\\.gcss\")\n" + 
+							"		eval(resource(resource, \"" + fullName + ".tpl.component\"))");
+					
+					writeFile(js, "component.glue", "for (resource : resources())\n" + 
+							"	if (resource ~ \".*\\.js\")\n" + 
+							"		echo(template(resource(resource)), \"\\n\")\n" + 
+							"\n" + 
+							"for (resource : resources(\"" + fullName + ".tpl.component\"))\n" + 
+							"	if (resource ~ \".*\\.js\")\n" + 
+							"		echo(template(resource(resource, \"" + fullName + ".tpl.component\")), \"\\n\")");
+					
+					ManageableContainer<?> jsComponent = (ManageableContainer<?>) ResourceUtils.mkdirs(js, "component");
+					copyFiles(entry.getRepository(), jsComponent, "resources/template/basic/javascript/routes.js");
+					
+					writeFile(jsComponent, "application.js", "application.initialize.modules.push(function() {\n" + 
+							"	application.services.vue.menu.push({\n" + 
+							"		title: \"" + name + "\",\n" + 
+							"		children: [{\n" + 
+							"			title: \"Do Something!\",\n" + 
+							"			handle: function() {\n" + 
+							"				application.services.router.route(\"routeSomewhere\");\n" + 
+							"			}\n" + 
+							"		}]\n" + 
+							"	});\n" + 
+							"});");
+					
+					writeFile(tpl, "component.glue", "for (resource : resources())\n" + 
+							"	if (resource ~ \".*\\.tpl\")\n" + 
+							"		echo(template(resource(resource)), \"\\n\")");
+				
+					ManageableContainer<?> home = (ManageableContainer<?>) ResourceUtils.mkdirs(tpl, "component/views/home");
+					copyFiles(entry.getRepository(), home, "resources/template/basic/home/home.css", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		return item;
 	}
 	
 	private MenuItem newBasicTemplate(Entry entry, final ManageableContainer<?> target) {
@@ -180,6 +242,20 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+	
+	private void writeFile(final ManageableContainer<?> target, String fileName, String content) throws IOException {
+		Resource child = target.getChild(fileName);
+		if (child == null) {
+			child = target.create(fileName, URLConnection.guessContentTypeFromName(fileName));
+		}
+		WritableContainer<ByteBuffer> writable = ((WritableResource) child).getWritable();
+		try {
+			IOUtils.copyBytes(IOUtils.wrap(content.getBytes("UTF-8"), true), writable);
+		}
+		finally {
+			writable.close();
 		}
 	}
 }
