@@ -77,7 +77,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					
 					writeFile(gcss, "component.gcss", "for (resource : resources(\"" + fullName + ".tpl.component\"))\n" + 
 							"	if (resource ~ \".*\\.gcss\")\n" + 
-							"		eval(resource(resource, \"" + fullName + ".tpl.component\"))");
+							"		eval(resource(resource, \"" + fullName + ".tpl.component\"), scope(1))");
 					
 					writeFile(js, "component.glue", "for (resource : resources())\n" + 
 							"	if (resource ~ \".*\\.js\")\n" + 
