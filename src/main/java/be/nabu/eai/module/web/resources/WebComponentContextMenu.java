@@ -102,9 +102,10 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							"	});\n" + 
 							"});");
 					
-					writeFile(tpl, "component.glue", "for (resource : resources())\n" + 
+					writeFile(tpl, "component.glue", "replacer = nabu.utils.lambdas()/templater" +
+							"for (resource : resources())\n" + 
 							"	if (resource ~ \".*\\.tpl\")\n" + 
-							"		echo(template(resource(resource)), \"\\n\")");
+							"		echo(replacer(template(resource(resource))), \"\\n\")");
 				
 					ManageableContainer<?> home = (ManageableContainer<?>) ResourceUtils.mkdirs(tpl, "component/views/home");
 					copyFiles(entry.getRepository(), home, "resources/template/basic/home/home.css", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
