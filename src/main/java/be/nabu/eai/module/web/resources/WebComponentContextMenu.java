@@ -102,7 +102,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							"	});\n" + 
 							"});");
 					
-					writeFile(tpl, "component.glue", "replacer = nabu.utils.lambdas()/templater" +
+					writeFile(tpl, "component.glue", "replacer = nabu.utils.lambdas()/templater\n" +
 							"for (resource : resources())\n" + 
 							"	if (resource ~ \".*\\.tpl\")\n" + 
 							"		echo(replacer(template(resource(resource))), \"\\n\")");
