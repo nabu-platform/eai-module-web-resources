@@ -1,0 +1,33 @@
+@cache 0
+
+string [] scripts ?= resources()
+
+for (script : scripts)
+	if (script ~ ".*\.gcss" && script != "web.gcss" && script !~ "mobile.*\.gcss" && script != "media.gcss")
+		eval(resource(script))
+
+switch (environment("mobile"))
+	case(true)
+		eval(resource("mobile.gcss"))
+		# Inject platform specific code if applicable
+		platformSpecific = "mobile-" + environment("platform") + ".gcss"
+		if (contains(platformSpecific, resources()))
+			eval(resource(platformSpecific))
+		# Inject platform-version specific code if applicable
+		if (environment("platformVersion") != null)
+			platformSpecific = "mobile-" + environment("platform") + "-" + environment("platformVersion") + ".gcss"
+			console("Checking " + platformSpecific + " in " + tuple(resources()) + " - " + contains(platformSpecific, resources()))
+			if (contains(platformSpecific, resources()))
+				eval(resource(platformSpecific))
+	default
+		response.header("Content-Type", "text/css")
+		eval(resource("web.gcss"))
+	
+for (resource : resources("index"))
+	if (resource ~ ".*\.gcss")
+		eval(resource(resource, "index"))
+
+// Add the nabu.components css
+nabu.components("css")
+
+eval(resource("media.gcss"))

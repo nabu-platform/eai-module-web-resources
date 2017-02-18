@@ -1,5 +1,9 @@
 var application = {
 	configuration: {
+		scheme: {
+			http: "${when(environment('secure'), 'https', 'http')}",
+			ws: "${when(environment('secure'), 'wss', 'ws')}"
+		},
 		url: "${environment('url', 'http://127.0.0.1')}",
 		host: "${environment('host', '127.0.0.1')}"
 	},

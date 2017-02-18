@@ -3,5 +3,5 @@ application.services.router.register({
 	enter: function() {
 		return new application.views.Home();
 	},
-	url: "/"
+	initial: true
 });

@@ -13,14 +13,15 @@ if (environment("mobile") == true)
 		<script src="javascript/nabu?version=${environment('version')}"></script>
 		<script src="javascript/application?version=${environment('version')}"></script>
 		<link rel="stylesheet" type="text/css" href="css/application?version=${environment('version')}">
-	</head>
-	<body>
 ${{
+replacer = nabu.utils.lambdas()/templater
 for (resource : resources())
 	if (resource ~ ".*\.tpl")
-		echo(resource(resource))
+		echo(replacer(resource(resource)))
 		
 nabu.components("tpl")
 }}
+	</head>
+	<body>
 	</body>
 </html>

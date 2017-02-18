@@ -108,7 +108,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							"		echo(replacer(template(resource(resource))), \"\\n\")");
 				
 					ManageableContainer<?> home = (ManageableContainer<?>) ResourceUtils.mkdirs(tpl, "component/views/home");
-					copyFiles(entry.getRepository(), home, "resources/template/basic/home/home.css", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+					copyFiles(entry.getRepository(), home, "resources/template/basic/home/home.gcss", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
 				}
 				catch (IOException e) {
 					e.printStackTrace();
@@ -152,7 +152,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					// copy the index file
 					copyFiles(entry.getRepository(), pages, "resources/template/basic/index.eglue");
 					// copy the home view
-					copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.css", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+					copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.gcss", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
 					// copy the javascript glue files
 					copyFiles(entry.getRepository(), javascript, "resources/template/basic/javascript/application.glue", 
 							"resources/template/basic/javascript/nabu.glue",
@@ -163,12 +163,12 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							"resources/template/basic/javascript/web.js",
 							"resources/template/basic/javascript/routes.js");
 					// copy the css glue file
-					copyFiles(entry.getRepository(), css, "resources/template/basic/css/application.glue");
+					copyFiles(entry.getRepository(), css, "resources/template/basic/css/application.gcss");
 					// copy the actual css files
-					copyFiles(entry.getRepository(), applicationCss, "resources/template/basic/css/application.css",
-							"resources/template/basic/css/mobile.css",
-							"resources/template/basic/css/web.css",
-							"resources/template/basic/css/media.css");
+					copyFiles(entry.getRepository(), applicationCss, "resources/template/basic/css/resources/application.gcss",
+							"resources/template/basic/css/resources/mobile.gcss",
+							"resources/template/basic/css/resources/web.gcss",
+							"resources/template/basic/css/resources/media.gcss");
 				}
 				catch (Exception e) {
 					throw new RuntimeException(e);
