@@ -1,0 +1,37 @@
+{
+	"name": "nabu-site",
+	"version": "1.0",
+	"resources": {
+		"vendor": {
+			"vue.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/js-vue-utils/bundle.json",
+				"includes": ["vue"]
+			},
+			"font-awesome.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/web-themes/font-awesome.json"
+			}
+		},
+		"nabu": {
+			"js-utils.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/js-utils/bundle.json"
+			},
+			"js-vue-utils.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/js-vue-utils/bundle.json",
+				"excludes": ["vue"]
+			},
+			"web-components.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/web-components/bundle.json"
+			},
+			"web-themes.json": {
+				"type": "bundle",
+				"url": "file:/home/alex/files/workspaces/javascript/web-themes/bundle.json",
+				"includes": ["standard"]
+			}
+		}
+	}
+}

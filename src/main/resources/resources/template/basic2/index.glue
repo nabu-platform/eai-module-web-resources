@@ -1,0 +1,6 @@
+@cache 0, revalidate
+
+nabu.utils.index(
+	title: "New Application",
+	javascript: "resources/javascript/application",
+	css: "resources/css/application")

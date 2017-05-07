@@ -35,6 +35,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			Menu menu = new Menu("Web Resources");
 			try {
 				ManageableContainer<?> publicDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PUBLIC);
+				ManageableContainer<?> privateDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PRIVATE);
 				ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "resources/javascript");
 				menu.getItems().add(newMenuItem(entry.getRepository(), "Ajax v1.1", javascript, "resources/javascript/ajax-1.1.js"));
 				menu.getItems().add(newMenuItem(entry.getRepository(), "D3 v3.5.12", javascript, "resources/javascript/d3-3.5.12.js"));
@@ -45,6 +46,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				Menu templates = new Menu("Templates");
 //				templates.getItems().add(newMenuTemplateItem(entry.getRepository(), "Basic", publicDirectory, "resources/template/basic/index.eglue", "resources/template/basic/main.js", "resources/template/basic/main.css"));
 				templates.getItems().add(newBasicTemplate(entry, publicDirectory));
+				templates.getItems().add(newBasic2Template(entry, publicDirectory, privateDirectory));
 				templates.getItems().add(newManagementTemplate(entry));
 				menu.getItems().add(templates);
 				return menu;
@@ -120,7 +122,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 	}
 	
 	private MenuItem newBasicTemplate(Entry entry, final ManageableContainer<?> target) {
-		MenuItem item = new MenuItem("Basic");
+		MenuItem item = new MenuItem("Basic (v1)");
 		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -169,6 +171,66 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							"resources/template/basic/css/resources/mobile.gcss",
 							"resources/template/basic/css/resources/web.gcss",
 							"resources/template/basic/css/resources/media.gcss");
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		});
+		return item;
+	}
+	
+	private MenuItem newBasic2Template(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
+		MenuItem item = new MenuItem("Basic (v2)");
+		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					Artifact artifact = entry.getNode().getArtifact();
+					if (artifact instanceof WebApplication) {
+						List<WebFragment> webFragments = ((WebApplication) artifact).getConfiguration().getWebFragments();
+						if (webFragments == null) {
+							webFragments = new ArrayList<WebFragment>();
+							((WebApplication) artifact).getConfiguration().setWebFragments(webFragments);
+						}
+						boolean found = false;
+						for (WebFragment fragment : webFragments) {
+							if ("nabu.web.core.components".equals(fragment.getId())) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							webFragments.add((WebFragment) entry.getRepository().getEntry("nabu.web.core.components").getNode().getArtifact());
+						}
+					}
+					ManageableContainer<?> pages = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages");
+					ManageableContainer<?> artifacts = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts");
+					ManageableContainer<?> homeView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/home");
+					ManageableContainer<?> indexView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/index");
+					ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/javascript");
+					ManageableContainer<?> css = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/css");
+
+					ManageableContainer<?> provided = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "provided");
+					
+					// copy the index file
+					copyFiles(entry.getRepository(), pages, "resources/template/basic2/index.glue");
+					// copy the home view
+					copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.gcss", "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+					// copy the index view
+					copyFiles(entry.getRepository(), indexView, "resources/template/basic/index/index.gcss", "resources/template/basic/index/index.tpl", "resources/template/basic/index/index.js");
+					// copy the javascript glue files
+					copyFiles(entry.getRepository(), javascript, "resources/template/basic2/application.glue");
+					// copy the actual javascript files
+					copyFiles(entry.getRepository(), artifacts, "resources/template/basic2/application.js",
+							"resources/template/basic2/swagger.js",
+							"resources/template/basic2/web.js",
+							"resources/template/basic2/routes.js");
+					// copy the css glue file
+					copyFiles(entry.getRepository(), css, "resources/template/basic2/application.gcss");
+					
+					// the bundle
+					copyFiles(entry.getRepository(), provided, "resources/template/basic2/bundle.json");
 				}
 				catch (Exception e) {
 					throw new RuntimeException(e);
