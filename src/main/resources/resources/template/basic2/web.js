@@ -3,6 +3,10 @@ window.addEventListener("load", function () {
 	document.documentElement.setAttribute("data-useragent", navigator.userAgent);
 	application.initialize().then(function() {
 		// route to initial state
-		application.services.router.routeInitial();
+		var handler = function() {
+			application.services.router.routeInitial();
+		}
+		// whether successful or not, route anyway
+		application.services.swagger.remember().then(handler, handler);
 	});
 });
