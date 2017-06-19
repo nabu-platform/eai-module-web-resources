@@ -5,32 +5,32 @@
 		"vendor": {
 			"vue.json": {
 				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/js-vue-utils/bundle.json",
+				"url": "https://raw.githubusercontent.com/nablex/js-vue-utils/master/bundle.json",
 				"includes": ["vue"]
 			},
 			"font-awesome.json": {
 				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/web-themes/font-awesome.json"
+				"url": "https://raw.githubusercontent.com/nablex/web-themes/master/font-awesome.json"
 			}
 		},
 		"nabu": {
+			"web-themes.json": {
+				"type": "bundle",
+				"url": "https://raw.githubusercontent.com/nablex/web-themes/master/bundle.json",
+				"includes": ["standard"]
+			},
 			"js-utils.json": {
 				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/js-utils/bundle.json"
+				"url": "https://raw.githubusercontent.com/nablex/js-utils/master/bundle.json"
 			},
 			"js-vue-utils.json": {
 				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/js-vue-utils/bundle.json",
+				"url": "https://raw.githubusercontent.com/nablex/js-vue-utils/master/bundle.json",
 				"excludes": ["vue"]
 			},
 			"web-components.json": {
 				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/web-components/bundle.json"
-			},
-			"web-themes.json": {
-				"type": "bundle",
-				"url": "file:/home/alex/files/workspaces/javascript/web-themes/bundle.json",
-				"includes": ["standard"]
+				"url": "https://raw.githubusercontent.com/nablex/web-components/master/bundle.json"
 			}
 		}
 	}
