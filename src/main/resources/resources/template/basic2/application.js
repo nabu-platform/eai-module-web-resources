@@ -12,8 +12,8 @@ application.configuration = {
 application.views = {};
 
 application.initialize = function() {
-	application.services = new nabu.services.ServiceManager(
-		function(services) {
+	application.services = new nabu.services.ServiceManager({
+		mixin: function(services) {
 			Vue.mixin({
 				// inject some services for use
 				computed: {
@@ -24,9 +24,9 @@ application.initialize = function() {
 				}
 			});	
 		},
-		nabu.services.Q,
-		application.definitions.Swagger,
-		function router($services) {
+		q: nabu.services.Q,
+		swagger: application.definitions.Swagger,
+		router: function router($services) {
 			this.$initialize = function() {
 				return new nabu.services.VueRouter({
 					useHash: true,
@@ -46,7 +46,7 @@ application.initialize = function() {
 				});
 			}
 		},
-		function vue() {
+		vue: function vue() {
 			this.$initialize = function() {
 				return new Vue({
 					el: "body",
@@ -56,6 +56,6 @@ application.initialize = function() {
 				});
 			}
 		},
-		application.routes);
+		routes: application.routes});
 	return application.services.$initialize();
 };
