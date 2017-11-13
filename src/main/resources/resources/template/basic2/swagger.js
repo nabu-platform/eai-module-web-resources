@@ -1,10 +1,13 @@
 if (!application) { var application = {} };
 if (!application.definitions) { application.definitions = {} }
 
-application.definitions.Swagger = function swagger($services) {
+application.definitions.Swagger = function($services) {
+	
+	var swaggerPath = "swagger.json";
+	
 	this.$initialize = function() {
-		// TODO: update the project name
-		return new nabu.services.SwaggerClient({
+		var promise = $services.q.defer();
+		var service = new nabu.services.SwaggerClient({
 			remember: function() {
 				if ($services.user) {
 					return $services.user.remember();
@@ -14,7 +17,25 @@ application.definitions.Swagger = function swagger($services) {
 					promise.reject();
 					return promise;
 				}
-			},
-			definition: ${project.artifacts.swagger(environment("webApplicationId"))/swagger} });
+			}
+		});
+		promise.stage(service);
+		
+		nabu.utils.ajax({
+			url: swaggerPath
+		}).then(function(response) {
+			service.loadDefinition(response.responseText);
+			service.$clear = function() {
+				return nabu.utils.ajax({
+					url: swaggerPath
+				}).then(function(response) {
+					service.loadDefinition(response.responseText);	
+				});
+			}
+			promise.resolve(service);
+		}, function(error) {
+			promise.reject(error);	
+		});
+		return promise;
 	}
 }

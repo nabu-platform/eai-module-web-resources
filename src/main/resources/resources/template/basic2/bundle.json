@@ -16,8 +16,7 @@
 		"nabu": {
 			"web-themes.json": {
 				"type": "bundle",
-				"url": "https://raw.githubusercontent.com/nablex/web-themes/master/bundle.json",
-				"includes": ["standard"]
+				"url": "https://raw.githubusercontent.com/nablex/web-themes/master/basic.json"
 			},
 			"js-utils.json": {
 				"type": "bundle",
