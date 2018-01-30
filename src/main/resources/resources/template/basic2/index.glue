@@ -1,4 +1,4 @@
-@cache 0, revalidate
+@cache 0, revalidate, refresh
 
 nabu.utils.index(
 	title: "New Application",

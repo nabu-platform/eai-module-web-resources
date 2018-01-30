@@ -95,8 +95,10 @@ application.initialize = function() {
 			this.$initialize = function() {
 				return new Vue({
 					el: "body",
-					data: {
-						route: null
+					data: function() {
+						return {
+							route: null
+						}
 					}
 				});
 			}
