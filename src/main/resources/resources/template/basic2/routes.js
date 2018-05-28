@@ -6,13 +6,15 @@ application.routes = function($services) {
 		enter: function() {
 			return new application.views.Index();
 		},
-		initial: true
+		initial: true,
+		priority: -10
 	});
 	$services.router.register({
 		alias: "home",
 		enter: function() {
 			return new application.views.Home();
 		},
-		url: "/"
+		url: "/",
+		priority: -10
 	});
 }

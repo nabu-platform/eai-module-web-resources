@@ -48,6 +48,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				templates.getItems().add(newBasicTemplate(entry, publicDirectory));
 				templates.getItems().add(newBasic2Template(entry, publicDirectory, privateDirectory));
 				templates.getItems().add(newManagementTemplate(entry));
+				templates.getItems().add(newPageTemplate(entry, publicDirectory, privateDirectory));
 				menu.getItems().add(templates);
 				return menu;
 			}
@@ -231,6 +232,72 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					
 					// the bundle
 					copyFiles(entry.getRepository(), provided, "resources/template/basic2/bundle.json");
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		});
+		return item;
+	}
+	
+	private MenuItem newPageTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
+		MenuItem item = new MenuItem("Page Builder");
+		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					Artifact artifact = entry.getNode().getArtifact();
+					if (artifact instanceof WebApplication) {
+						List<WebFragment> webFragments = ((WebApplication) artifact).getConfiguration().getWebFragments();
+						if (webFragments == null) {
+							webFragments = new ArrayList<WebFragment>();
+							((WebApplication) artifact).getConfiguration().setWebFragments(webFragments);
+						}
+						boolean foundCore = false;
+						boolean foundPage = false;
+						for (WebFragment fragment : webFragments) {
+							if ("nabu.web.core.components".equals(fragment.getId())) {
+								foundCore = true;
+							}
+							else if ("nabu.web.page.core.component".equals(fragment.getId())) {
+								foundPage = true;
+							}
+						}
+						if (!foundCore) {
+							webFragments.add((WebFragment) entry.getRepository().getEntry("nabu.web.core.components").getNode().getArtifact());
+						}
+						if (!foundPage) {
+							webFragments.add((WebFragment) entry.getRepository().getEntry("nabu.web.page.core.component").getNode().getArtifact());
+						}
+					}
+					ManageableContainer<?> pages = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages");
+					ManageableContainer<?> artifacts = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts");
+					ManageableContainer<?> homeView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/home");
+					ManageableContainer<?> indexView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/index");
+					ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/javascript");
+					ManageableContainer<?> css = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/css");
+
+					ManageableContainer<?> provided = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "provided");
+					
+					// copy the index file
+					copyFiles(entry.getRepository(), pages, "resources/template/basic2/index.glue");
+					// copy the home view
+					copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+					// copy the index view
+					copyFiles(entry.getRepository(), indexView, "resources/template/basic/index/index.tpl", "resources/template/basic/index/index.js");
+					// copy the javascript glue files
+					copyFiles(entry.getRepository(), javascript, "resources/template/basic2/application.glue");
+					// copy the actual javascript files
+					copyFiles(entry.getRepository(), artifacts, "resources/template/basic2/application.js",
+							"resources/template/basic2/swagger.js",
+							"resources/template/basic2/web.js",
+							"resources/template/basic2/routes.js");
+					// copy the css glue file
+					copyFiles(entry.getRepository(), css, "resources/template/page/application.glue");
+					
+					// the bundle
+					copyFiles(entry.getRepository(), provided, "resources/template/page/bundle.json");
 				}
 				catch (Exception e) {
 					throw new RuntimeException(e);

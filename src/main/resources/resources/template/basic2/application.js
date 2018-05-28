@@ -1,3 +1,4 @@
+
 if (!application) { var application = {} }
 
 application.configuration = {
@@ -46,7 +47,7 @@ application.initialize = function() {
 				return function(element, clazz) {
 					nabu.utils.elements.clear(element);
 					var span = document.createElement("span");
-					span.setAttribute("class", "n-icon n-icon-spinner" + (clazz ? " " + clazz : ""));
+					span.setAttribute("class", "n-icon n-icon-spinner fa spinner" + (clazz ? " " + clazz : ""));
 					span.setAttribute("style", "display: block; text-align: center");
 					element.appendChild(span);
 					return span;
@@ -56,12 +57,13 @@ application.initialize = function() {
 		router: function router($services) {
 			this.$initialize = function() {
 				return new nabu.services.VueRouter({
+					useProps: true,
 					useHash: true,
 					unknown: function(alias, parameters, anchor) {
 						return $services.router.get("notFound");
 					},
 					authorizer: function(anchor, newRoute, newParameters, oldRoute, oldParameters) {
-						if (newRoute.roles) {
+						if (newRoute.roles && $services.user) {
 							if (newRoute.roles.indexOf("$guest") < 0 && !$services.user.loggedIn) {
 								return {
 									alias: "login"
@@ -70,6 +72,20 @@ application.initialize = function() {
 							else if (newRoute.roles.indexOf("$user") < 0 && $services.user.loggedIn) {
 								return {
 									alias: "home"
+								}
+							}
+						}
+						if (newRoute.actions && $services.user && $services.user.hasAction) {
+							var hasAction = false;
+							for (var i = 0; i < newRoute.actions.length; i++) {
+								if ($services.user.hasAction(newRoute.actions[i])) {
+									hasAction = true;
+									break;
+								}
+							}
+							if (!hasAction) {
+								return {
+									alias: $services.user.loggedIn ? "home" : "login"
 								}
 							}
 						}
@@ -82,11 +98,13 @@ application.initialize = function() {
 							});
 						}	
 					},
-					enter: function(anchor, newRoute, newParameters, oldRoute, oldParameters, newRouteReturn) {
-						$services.vue.route = newRoute.alias;
-						// reset scroll
-						// document.body.scrollTop = 0;
-						window.scrollTo(0, 0);
+					enter: function(anchor, newRoute, newParameters, oldRoute, oldParameters, newRouteReturn, mask) {
+						if (!mask && newRoute.url) {
+							$services.vue.route = newRoute.alias;
+							// reset scroll
+							// document.body.scrollTop = 0;
+							window.scrollTo(0, 0);
+						}
 					}
 				});
 			}
