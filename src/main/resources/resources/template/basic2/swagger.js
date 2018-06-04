@@ -3,7 +3,7 @@ if (!application.definitions) { application.definitions = {} }
 
 application.definitions.Swagger = function($services) {
 	
-	var swaggerPath = "swagger.json";
+	var swaggerPath = "${server.root()}swagger.json";
 	
 	this.$initialize = function() {
 		var promise = $services.q.defer();

@@ -2,5 +2,5 @@
 
 nabu.utils.index(
 	title: "New Application",
-	javascript: "resources/javascript/application",
-	css: "resources/css/application")
+	javascript: server.root() + "resources/javascript/application",
+	css: server.root() + "resources/css/application")
