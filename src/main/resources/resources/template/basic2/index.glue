@@ -1,6 +1,6 @@
 @cache 0, revalidate, refresh
 
 nabu.utils.index(
-	title: "New Application",
+	title: "Loading...",
 	javascript: server.root() + "resources/javascript/application",
 	css: server.root() + "resources/css/application")
