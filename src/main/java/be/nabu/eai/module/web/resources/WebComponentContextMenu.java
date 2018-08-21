@@ -252,67 +252,86 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 	private MenuItem newPageWithCMSTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
 		MenuItem item = new MenuItem("Page Builder (CMS)");
 
-		// copy basic template
-		copyPageTemplate(entry, publicDirectory, privateDirectory, "nabu.cms.core.components.main");
-		
-		try {
-			Artifact artifact = (WebApplication) entry.getNode().getArtifact();
-			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
+		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent arg0) {
+				// copy basic template
+				// we add the component to initialize an editor and the component to add password protection (optional)
+				// the order is somewhat important:
+				// because external components do a promote() on preprocessors, the last components are triggered first
+				// we first want to pass by the password protect (if any), and only then set an administrative user
+				// because the administrative user creator checks that no redirects are active, it plays well together
+				// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
+				copyPageTemplate(entry, publicDirectory, privateDirectory, 
+					// load cms
+					"nabu.cms.core.components.main", 
+					// allow creation of an initial administrator user
+					"nabu.web.page.cms.initialAdministrator.component", 
+					// use password protect for qlty deployment etc
+					"nabu.web.core.passwordProtect",
+					// general cms integration stuff with the page builder
+					"nabu.web.page.cms.component");
 				
-				// set stuff in the web application
-				WebApplication application = (WebApplication) artifact;
-				if (application.getConfig().getRealm() == null) {
-					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
-				}
-				if (application.getConfig().getPasswordAuthenticationService() == null) {
-					application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
-				}
-				if (application.getConfig().getSecretAuthenticationService() == null) {
-					application.getConfig().setSecretAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
-				}
-				if (application.getConfig().getRoleService() == null) {
-					application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
-				}
-				// choose: either role handler or permission handler
-				// a lot of simple applications only have role handler (including management screens etc)
-				// and most complex applications start simple with only the role handler, graduating to permission handler over time
-				// this probably requires more settings anyway
+				try {
+					Artifact artifact = (WebApplication) entry.getNode().getArtifact();
+					if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
+						
+						// set stuff in the web application
+						WebApplication application = (WebApplication) artifact;
+						if (application.getConfig().getRealm() == null) {
+							application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
+						}
+						if (application.getConfig().getPasswordAuthenticationService() == null) {
+							application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
+						}
+						if (application.getConfig().getSecretAuthenticationService() == null) {
+							application.getConfig().setSecretAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
+						}
+						if (application.getConfig().getRoleService() == null) {
+							application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
+						}
+						// choose: either role handler or permission handler
+						// a lot of simple applications only have role handler (including management screens etc)
+						// and most complex applications start simple with only the role handler, graduating to permission handler over time
+						// this probably requires more settings anyway
 //				if (application.getConfig().getPermissionService() == null) {
 //					application.getConfig().setPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.permissionHandler"));
 //				}
 //				if (application.getConfig().getPotentialPermissionService() == null) {
 //					application.getConfig().setPotentialPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.potentialPermissionHandler"));
 //				}
-				if (application.getConfig().getTranslationService() == null) {
-					application.getConfig().setTranslationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.translationService"));
+						if (application.getConfig().getTranslationService() == null) {
+							application.getConfig().setTranslationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.translationService"));
+						}
+						if (application.getConfig().getLanguageProviderService() == null) {
+							application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
+						}
+						if (application.getConfig().getDeviceValidatorService() == null) {
+							application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
+						}
+						
+						ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
+						if (configuration == null) {
+							configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration")).newInstance();
+						}
+						if (configuration.get("context") == null) {
+							ComplexContent context = ((ComplexType) configuration.getType().get("context").getType()).newInstance();
+							context.set("type", "webApplication");
+							context.set("contextResolver", "nabu.web.page.cms.providers.contextResolver");
+							configuration.set("context[0]", context);
+						}
+						
+						application.putConfiguration(configuration, null, false);
+						
+						new WebApplicationManager().save((ResourceEntry) entry, application);
+					}
 				}
-				if (application.getConfig().getLanguageProviderService() == null) {
-					application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
-				}
-				if (application.getConfig().getDeviceValidatorService() == null) {
-					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
+				catch (Exception e) {
+					throw new RuntimeException(e);
 				}
 				
-				ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
-				if (configuration == null) {
-					configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration")).newInstance();
-				}
-				if (configuration.get("context") == null) {
-					ComplexContent context = ((ComplexType) configuration.getType().get("context").getType()).newInstance();
-					context.set("type", "webApplication");
-					context.set("contextResolver", "nabu.web.page.cms.providers.contextResolver");
-					configuration.set("context[0]", context);
-				}
-				
-				application.putConfiguration(configuration, null, false);
-				
-				new WebApplicationManager().save((ResourceEntry) entry, application);
 			}
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		
+		});
 		return item;
 	}
 	
