@@ -7,7 +7,8 @@ application.configuration = {
 		ws: "${when(environment('secure'), 'wss', 'ws')}"
 	},
 	url: "${environment('url', 'http://127.0.0.1')}",
-	host: "${environment('host', '127.0.0.1')}"
+	host: "${environment('host', '127.0.0.1')}",
+	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0
 };
 
 application.views = {};
@@ -62,7 +63,7 @@ application.initialize = function() {
 					unknown: function(alias, parameters, anchor) {
 						return $services.router.get("notFound");
 					},
-					authorizer: function(anchor, newRoute, newParameters, oldRoute, oldParameters) {
+					authorizer: function(anchor, newRoute, newParameters) {
 						if (newRoute.roles && $services.user) {
 							if (newRoute.roles.indexOf("$guest") < 0 && !$services.user.loggedIn) {
 								return {
@@ -90,15 +91,15 @@ application.initialize = function() {
 							}
 						}
 					},
-					chosen: function(anchor, newRoute, newParameters, oldRoute, oldParameters) {
-						if (anchor && newRoute.slow) {
+					chosen: function(anchor, newRoute, newParameters) {
+						if (anchor && newRoute.slow && nabu && nabu.views && nabu.views.cms) {
 							nabu.utils.vue.render({
 								target: anchor,
 								content: new nabu.views.cms.core.Loader()
 							});
 						}	
 					},
-					enter: function(anchor, newRoute, newParameters, oldRoute, oldParameters, newRouteReturn, mask) {
+					enter: function(anchor, newRoute, newParameters, newRouteReturn, mask) {
 						if (!mask && newRoute.url) {
 							$services.vue.route = newRoute.alias;
 							// reset scroll

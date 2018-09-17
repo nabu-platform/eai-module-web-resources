@@ -270,7 +270,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					// use password protect for qlty deployment etc
 					"nabu.web.core.passwordProtect",
 					// general cms integration stuff with the page builder
-					"nabu.web.page.cms.component");
+					"nabu.web.page.cms.component",
+					// allow for dynamic cms components
+					"nabu.cms.dynamic.component");
 				
 				try {
 					Artifact artifact = (WebApplication) entry.getNode().getArtifact();
