@@ -308,10 +308,14 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 						if (application.getConfig().getLanguageProviderService() == null) {
 							application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
 						}
+						if (application.getConfig().getSupportedLanguagesService() == null) {
+							application.getConfig().setSupportedLanguagesService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.supportedLanguages"));
+						}
 						if (application.getConfig().getDeviceValidatorService() == null) {
 							application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
 						}
 						
+						// update the CMS configuration
 						ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
 						if (configuration == null) {
 							configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration")).newInstance();
@@ -322,7 +326,15 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 							context.set("contextResolver", "nabu.web.page.cms.providers.contextResolver");
 							configuration.set("context[0]", context);
 						}
+						application.putConfiguration(configuration, null, false);
 						
+						// update the page configuration
+						configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration"));
+						if (configuration == null) {
+							configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration")).newInstance();
+						}
+						configuration.set("providers/getAllContent", "nabu.web.page.cms.providers.content.getAllContent");
+						configuration.set("providers/setContent", "nabu.web.page.cms.providers.content.setContent");
 						application.putConfiguration(configuration, null, false);
 						
 						new WebApplicationManager().save((ResourceEntry) entry, application);
