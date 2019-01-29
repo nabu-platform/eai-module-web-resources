@@ -389,7 +389,13 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				
 				for (String component : componentsToLoad) {
 					if (!loaded.contains(component)) {
-						webFragments.add((WebFragment) entry.getRepository().getEntry(component).getNode().getArtifact());	
+						Entry fragmentEntry = entry.getRepository().getEntry(component);
+						if (fragmentEntry != null) {
+							webFragments.add((WebFragment) fragmentEntry.getNode().getArtifact());
+						}
+						else {
+							System.out.println("Skipping non-existent component: " + component);
+						}
 					}
 				}
 				// save the changes

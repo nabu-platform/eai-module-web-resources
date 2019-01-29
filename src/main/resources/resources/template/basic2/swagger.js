@@ -17,7 +17,8 @@ application.definitions.Swagger = function($services) {
 					promise.reject();
 					return promise;
 				}
-			}
+			},
+			parseError: true
 		});
 		promise.stage(service);
 		
