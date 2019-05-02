@@ -1,6 +1,8 @@
 window.addEventListener("load", function () {
 	// make sure we can target the browser using css
-	document.documentElement.setAttribute("data-useragent", navigator.userAgent);
+	if (!navigator.userAgent.match(/Nabu-Renderer/)) {
+		document.documentElement.setAttribute("data-useragent", navigator.userAgent);
+	}
 
     // set load icon while the application is starting up
 	var span = document.createElement("span");

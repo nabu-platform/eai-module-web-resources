@@ -58,6 +58,7 @@ application.initialize = function() {
 		router: function router($services) {
 			this.$initialize = function() {
 				return new nabu.services.VueRouter({
+					useParents: true,
 					useProps: true,
 					useHash: !${nabu.web.application.Services.information(environment("webApplicationId"))/information/html5Mode},
 					unknown: function(alias, parameters, anchor) {

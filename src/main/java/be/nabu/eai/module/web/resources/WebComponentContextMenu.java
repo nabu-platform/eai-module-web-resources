@@ -44,17 +44,17 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				ManageableContainer<?> publicDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PUBLIC);
 				ManageableContainer<?> privateDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PRIVATE);
 				ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "resources/javascript");
-				menu.getItems().add(newMenuItem(entry.getRepository(), "Ajax v1.1", javascript, "resources/javascript/ajax-1.1.js"));
-				menu.getItems().add(newMenuItem(entry.getRepository(), "D3 v3.5.12", javascript, "resources/javascript/d3-3.5.12.js"));
-				menu.getItems().add(newMenuItem(entry.getRepository(), "Chart JS v1.0.2", javascript, "resources/javascript/chart-1.0.2.js"));
-				menu.getItems().add(newMenuItem(entry.getRepository(), "Vue JS v1.0.13", javascript, "resources/javascript/vue-1.0.13.js", "resources/javascript/vue-router-0.7.7.js"));
-				menu.getItems().add(newMenuTemplateItem(entry.getRepository(), "Chartist v0.9.5", publicDirectory, "resources/javascript/chartist-0.9.5.js", "resources/css/chartist-0.9.5.css"));
+//				menu.getItems().add(newMenuItem(entry.getRepository(), "Ajax v1.1", javascript, "resources/javascript/ajax-1.1.js"));
+//				menu.getItems().add(newMenuItem(entry.getRepository(), "D3 v3.5.12", javascript, "resources/javascript/d3-3.5.12.js"));
+//				menu.getItems().add(newMenuItem(entry.getRepository(), "Chart JS v1.0.2", javascript, "resources/javascript/chart-1.0.2.js"));
+//				menu.getItems().add(newMenuItem(entry.getRepository(), "Vue JS v1.0.13", javascript, "resources/javascript/vue-1.0.13.js", "resources/javascript/vue-router-0.7.7.js"));
+//				menu.getItems().add(newMenuTemplateItem(entry.getRepository(), "Chartist v0.9.5", publicDirectory, "resources/javascript/chartist-0.9.5.js", "resources/css/chartist-0.9.5.css"));
 				
 				Menu templates = new Menu("Templates");
 //				templates.getItems().add(newMenuTemplateItem(entry.getRepository(), "Basic", publicDirectory, "resources/template/basic/index.eglue", "resources/template/basic/main.js", "resources/template/basic/main.css"));
-				templates.getItems().add(newBasicTemplate(entry, publicDirectory));
+//				templates.getItems().add(newBasicTemplate(entry, publicDirectory));
 				templates.getItems().add(newBasic2Template(entry, publicDirectory, privateDirectory));
-				templates.getItems().add(newManagementTemplate(entry));
+//				templates.getItems().add(newManagementTemplate(entry));
 				templates.getItems().add(newPageTemplate(entry, publicDirectory, privateDirectory));
 				templates.getItems().add(newPageWithCMSTemplate(entry, publicDirectory, privateDirectory));
 				menu.getItems().add(templates);
@@ -190,7 +190,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 	}
 	
 	private MenuItem newBasic2Template(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
-		MenuItem item = new MenuItem("Basic (v2)");
+		MenuItem item = new MenuItem("Basic");
 		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -335,6 +335,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 						}
 						configuration.set("providers/getAllContent", "nabu.web.page.cms.providers.content.getAllContent");
 						configuration.set("providers/setContent", "nabu.web.page.cms.providers.content.setContent");
+						configuration.set("providers/translationProvider", "nabu.web.page.cms.providers.content.translationProvider");
 						application.putConfiguration(configuration, null, false);
 						
 						new WebApplicationManager().save((ResourceEntry) entry, application);
@@ -384,7 +385,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					((WebApplication) artifact).getConfiguration().setWebFragments(webFragments);
 				}
 				for (WebFragment fragment : webFragments) {
-					loaded.add(fragment.getId());
+					if (fragment != null) {
+						loaded.add(fragment.getId());
+					}
 				}
 				
 				for (String component : componentsToLoad) {
