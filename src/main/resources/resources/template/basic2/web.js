@@ -8,7 +8,12 @@ window.addEventListener("load", function () {
 	var span = document.createElement("span");
 	span.setAttribute("class", "n-icon n-icon-spinner");
 	span.setAttribute("style", "position: static");
-	document.body.appendChild(span);
+	// we might be using body routing
+	var body = document.getElementById("body");
+	if (!body) {
+		body = document.body;
+	}
+	body.appendChild(span);
 
 	application.initialize().then(function($services) {
 		// route to initial state

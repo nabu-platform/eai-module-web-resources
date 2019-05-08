@@ -8,7 +8,8 @@ application.configuration = {
 	},
 	url: "${environment('url', 'http://127.0.0.1')}",
 	host: "${environment('host', '127.0.0.1')}",
-	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0
+	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0,
+	applicationLanguage: "${applicationLanguage()}"
 };
 
 application.views = {};
