@@ -61,7 +61,7 @@ application.initialize = function() {
 				return new nabu.services.VueRouter({
 					useParents: true,
 					useProps: true,
-					useHash: !${nabu.web.application.Services.information(environment("webApplicationId"))/information/html5Mode},
+					useHash: ${environment("mobile") == true || !nabu.web.application.Services.information(environment("webApplicationId"))/information/html5Mode},
 					unknown: function(alias, parameters, anchor) {
 						return $services.router.get("notFound");
 					},

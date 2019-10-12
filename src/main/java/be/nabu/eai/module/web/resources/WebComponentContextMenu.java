@@ -234,6 +234,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					copyFiles(entry.getRepository(), artifacts, "resources/template/basic2/application.js",
 							"resources/template/basic2/swagger.js",
 							"resources/template/basic2/web.js",
+							"resources/template/basic2/mobile.js",
 							"resources/template/basic2/routes.js");
 					// copy the css glue file
 					copyFiles(entry.getRepository(), css, "resources/template/basic2/application.gcss");
@@ -426,6 +427,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			copyFiles(entry.getRepository(), artifacts, "resources/template/basic2/application.js",
 					"resources/template/basic2/swagger.js",
 					"resources/template/basic2/web.js",
+					"resources/template/basic2/mobile.js",
 					"resources/template/basic2/routes.js");
 			// copy the css glue file
 			copyFiles(entry.getRepository(), css, "resources/template/page/application.glue");
