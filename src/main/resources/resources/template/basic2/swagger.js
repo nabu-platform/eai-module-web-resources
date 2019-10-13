@@ -23,6 +23,7 @@ application.definitions.Swagger = function($services) {
 		promise.stage(service);
 		
 		nabu.utils.ajax({
+			cache: true,
 			url: swaggerPath
 		}).then(function(response) {
 			service.loadDefinition(response.responseText);
