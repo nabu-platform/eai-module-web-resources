@@ -9,7 +9,7 @@ application.definitions.Swagger = function($services) {
 		var promise = $services.q.defer();
 		var service = new nabu.services.SwaggerClient({
 			remember: function() {
-				if ($services.user) {
+				if ($services.user && $services.user.remember) {
 					return $services.user.remember();
 				}
 				else {

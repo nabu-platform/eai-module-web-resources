@@ -357,8 +357,14 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			@Override
 			public void handle(ActionEvent arg0) {
 				copyPageTemplate(entry, publicDirectory, privateDirectory);
+				try {
+					ManageableContainer<?> services = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/services");
+					copyFiles(entry.getRepository(), services, "resources/template/basic2/user.js");
+				}
+				catch (Exception e) {
+					throw new RuntimeException(e);
+				}
 			}
-
 		});
 		return item;
 	}
