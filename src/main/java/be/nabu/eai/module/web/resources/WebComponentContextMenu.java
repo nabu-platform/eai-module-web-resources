@@ -315,6 +315,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 						if (application.getConfig().getDeviceValidatorService() == null) {
 							application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
 						}
+						if (application.getConfig().getFeatureTestingRole() == null || application.getConfig().getFeatureTestingRole().isEmpty()) {
+							application.getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
+						}
 						
 						// update the CMS configuration
 						ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
@@ -395,6 +398,10 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					if (fragment != null) {
 						loaded.add(fragment.getId());
 					}
+				}
+				
+				if (((WebApplication) artifact).getConfig().getFeatureTestingRole() == null || ((WebApplication) artifact).getConfig().getFeatureTestingRole().isEmpty()) {
+					((WebApplication) artifact).getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
 				
 				for (String component : componentsToLoad) {
