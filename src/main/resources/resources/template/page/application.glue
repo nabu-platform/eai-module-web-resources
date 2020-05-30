@@ -1,3 +1,4 @@
 @cache 0, refresh
 
-inject(nabu.utils.css(allowGcss: false, allowSass: true))
+#inject(nabu.utils.css(allowGcss: false, allowSass: true))
+nabu.utils.cssWithExtends()

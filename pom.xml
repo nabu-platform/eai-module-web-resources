@@ -42,10 +42,10 @@
 			<artifactId>eai-module-web-application</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>nabu</groupId>
 			<artifactId>eai-module-web-component</artifactId>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 </project>

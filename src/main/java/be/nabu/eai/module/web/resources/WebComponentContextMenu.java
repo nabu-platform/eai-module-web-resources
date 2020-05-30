@@ -15,7 +15,6 @@ import be.nabu.eai.developer.api.EntryContextMenuProvider;
 import be.nabu.eai.module.web.application.WebApplication;
 import be.nabu.eai.module.web.application.WebApplicationManager;
 import be.nabu.eai.module.web.application.WebFragment;
-import be.nabu.eai.module.web.component.WebComponent;
 import be.nabu.eai.repository.EAIResourceRepository;
 import be.nabu.eai.repository.api.Entry;
 import be.nabu.eai.repository.api.Repository;
@@ -38,7 +37,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 
 	@Override
 	public MenuItem getContext(Entry entry) {
-		if (entry instanceof ResourceEntry && entry.isNode() && (WebApplication.class.isAssignableFrom(entry.getNode().getArtifactClass()) || WebComponent.class.isAssignableFrom(entry.getNode().getArtifactClass()))) {
+		if (entry instanceof ResourceEntry && entry.isNode() && (WebApplication.class.isAssignableFrom(entry.getNode().getArtifactClass()))) {
 			Menu menu = new Menu("Web Resources");
 			try {
 				ManageableContainer<?> publicDirectory = (ManageableContainer<?>) ResourceUtils.mkdirs(((ResourceEntry) entry).getContainer(), EAIResourceRepository.PUBLIC);
@@ -256,102 +255,106 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		item.addEventHandler(ActionEvent.ANY, new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent arg0) {
-				// copy basic template
-				// we add the component to initialize an editor and the component to add password protection (optional)
-				// the order is somewhat important:
-				// because external components do a promote() on preprocessors, the last components are triggered first
-				// we first want to pass by the password protect (if any), and only then set an administrative user
-				// because the administrative user creator checks that no redirects are active, it plays well together
-				// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
-				copyPageTemplate(entry, publicDirectory, privateDirectory, 
-					// load cms
-					"nabu.cms.core.components.main", 
-					// allow creation of an initial administrator user
-					"nabu.web.page.cms.initialAdministrator.component", 
-					// use password protect for qlty deployment etc
-					"nabu.web.core.passwordProtect",
-					// general cms integration stuff with the page builder
-					"nabu.web.page.cms.component",
-					// allow for dynamic cms components
-					"nabu.cms.dynamic.component");
+				copyPageWithCms(entry, publicDirectory, privateDirectory);
+			}
+
+		});
+		return item;
+	}
+	
+	public static void copyPageWithCms(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
+		// copy basic template
+		// we add the component to initialize an editor and the component to add password protection (optional)
+		// the order is somewhat important:
+		// because external components do a promote() on preprocessors, the last components are triggered first
+		// we first want to pass by the password protect (if any), and only then set an administrative user
+		// because the administrative user creator checks that no redirects are active, it plays well together
+		// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
+		copyPageTemplate(entry, publicDirectory, privateDirectory, 
+				// load cms
+				"nabu.cms.core.components.main", 
+				// allow creation of an initial administrator user
+				"nabu.web.page.cms.initialAdministrator.component", 
+				// use password protect for qlty deployment etc
+				"nabu.web.core.passwordProtect",
+				// general cms integration stuff with the page builder
+				"nabu.web.page.cms.component",
+				// allow for dynamic cms components
+				"nabu.cms.dynamic.component");
+		
+		try {
+			Artifact artifact = (WebApplication) entry.getNode().getArtifact();
+			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
 				
-				try {
-					Artifact artifact = (WebApplication) entry.getNode().getArtifact();
-					if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
-						
-						// set stuff in the web application
-						WebApplication application = (WebApplication) artifact;
-						if (application.getConfig().getRealm() == null) {
-							application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
-						}
-						if (application.getConfig().getPasswordAuthenticationService() == null) {
-							application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
-						}
-						if (application.getConfig().getSecretAuthenticationService() == null) {
-							application.getConfig().setSecretAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
-						}
-						if (application.getConfig().getRoleService() == null) {
-							application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
-						}
-						// choose: either role handler or permission handler
-						// a lot of simple applications only have role handler (including management screens etc)
-						// and most complex applications start simple with only the role handler, graduating to permission handler over time
-						// this probably requires more settings anyway
+				// set stuff in the web application
+				WebApplication application = (WebApplication) artifact;
+				if (application.getConfig().getRealm() == null) {
+					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
+				}
+				if (application.getConfig().getPasswordAuthenticationService() == null) {
+					application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
+				}
+				if (application.getConfig().getSecretAuthenticationService() == null) {
+					application.getConfig().setSecretAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
+				}
+				if (application.getConfig().getRoleService() == null) {
+					application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
+				}
+				// choose: either role handler or permission handler
+				// a lot of simple applications only have role handler (including management screens etc)
+				// and most complex applications start simple with only the role handler, graduating to permission handler over time
+				// this probably requires more settings anyway
 //				if (application.getConfig().getPermissionService() == null) {
 //					application.getConfig().setPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.permissionHandler"));
 //				}
 //				if (application.getConfig().getPotentialPermissionService() == null) {
 //					application.getConfig().setPotentialPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.potentialPermissionHandler"));
 //				}
-						if (application.getConfig().getTranslationService() == null) {
-							application.getConfig().setTranslationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.translationService"));
-						}
-						if (application.getConfig().getLanguageProviderService() == null) {
-							application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
-						}
-						if (application.getConfig().getSupportedLanguagesService() == null) {
-							application.getConfig().setSupportedLanguagesService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.supportedLanguages"));
-						}
-						if (application.getConfig().getDeviceValidatorService() == null) {
-							application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
-						}
-						if (application.getConfig().getFeatureTestingRole() == null || application.getConfig().getFeatureTestingRole().isEmpty()) {
-							application.getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
-						}
-						
-						// update the CMS configuration
-						ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
-						if (configuration == null) {
-							configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration")).newInstance();
-						}
-						if (configuration.get("context") == null) {
-							ComplexContent context = ((ComplexType) configuration.getType().get("context").getType()).newInstance();
-							context.set("type", "webApplication");
-							context.set("contextResolver", "nabu.web.page.cms.providers.contextResolver");
-							configuration.set("context[0]", context);
-						}
-						application.putConfiguration(configuration, null, false);
-						
-						// update the page configuration
-						configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration"));
-						if (configuration == null) {
-							configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration")).newInstance();
-						}
-						configuration.set("providers/getAllContent", "nabu.web.page.cms.providers.content.getAllContent");
-						configuration.set("providers/setContent", "nabu.web.page.cms.providers.content.setContent");
-						configuration.set("providers/translationProvider", "nabu.web.page.cms.providers.content.translationProvider");
-						application.putConfiguration(configuration, null, false);
-						
-						new WebApplicationManager().save((ResourceEntry) entry, application);
-					}
+				if (application.getConfig().getTranslationService() == null) {
+					application.getConfig().setTranslationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.translationService"));
 				}
-				catch (Exception e) {
-					throw new RuntimeException(e);
+				if (application.getConfig().getLanguageProviderService() == null) {
+					application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
+				}
+				if (application.getConfig().getSupportedLanguagesService() == null) {
+					application.getConfig().setSupportedLanguagesService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.supportedLanguages"));
+				}
+				if (application.getConfig().getDeviceValidatorService() == null) {
+					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
+				}
+				if (application.getConfig().getFeatureTestingRole() == null || application.getConfig().getFeatureTestingRole().isEmpty()) {
+					application.getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
 				
+				// update the CMS configuration
+				ComplexContent configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration"));
+				if (configuration == null) {
+					configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.cms.core.configuration")).newInstance();
+				}
+				if (configuration.get("context") == null) {
+					ComplexContent context = ((ComplexType) configuration.getType().get("context").getType()).newInstance();
+					context.set("type", "webApplication");
+					context.set("contextResolver", "nabu.web.page.cms.providers.contextResolver");
+					configuration.set("context[0]", context);
+				}
+				application.putConfiguration(configuration, null, false);
+				
+				// update the page configuration
+				configuration = application.getConfigurationFor(".*", (ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration"));
+				if (configuration == null) {
+					configuration = ((ComplexType) DefinedTypeResolverFactory.getInstance().getResolver().resolve("nabu.web.page.core.types.configuration")).newInstance();
+				}
+				configuration.set("providers/getAllContent", "nabu.web.page.cms.providers.content.getAllContent");
+				configuration.set("providers/setContent", "nabu.web.page.cms.providers.content.setContent");
+				configuration.set("providers/translationProvider", "nabu.web.page.cms.providers.content.translationProvider");
+				application.putConfiguration(configuration, null, false);
+				
+				new WebApplicationManager().save((ResourceEntry) entry, application);
 			}
-		});
-		return item;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private MenuItem newPageTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
@@ -372,7 +375,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		return item;
 	}
 	
-	private void copyPageTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory, String...components) {
+	public static void copyPageTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory, String...components) {
 		try {
 			Artifact artifact = entry.getNode().getArtifact();
 			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
@@ -493,7 +496,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		return item;
 	}
 
-	private void copyFiles(Repository repository, final ManageableContainer<?> target, final String...paths) {
+	public static void copyFiles(Repository repository, final ManageableContainer<?> target, final String...paths) {
 		try {
 			for (String path : paths) {
 				String fileName = path.replaceAll("^.*?/([^/]+)$", "$1");
