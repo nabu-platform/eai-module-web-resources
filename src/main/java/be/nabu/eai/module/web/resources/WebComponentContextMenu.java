@@ -294,6 +294,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getPasswordAuthenticationService() == null) {
 					application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
 				}
+				if (application.getConfig().getSecretGeneratorService() == null) {
+					application.getConfig().setSecretGeneratorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
+				}
 				if (application.getConfig().getSecretAuthenticationService() == null) {
 					application.getConfig().setSecretAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretAuthenticator"));
 				}
