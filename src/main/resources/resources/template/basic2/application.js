@@ -68,6 +68,8 @@ application.initialize = function() {
 					authorizer: function(anchor, newRoute, newParameters) {
 						if (newRoute.roles && $services.user) {
 							if (newRoute.roles.indexOf("$guest") < 0 && !$services.user.loggedIn) {
+								$services.vue.attemptedRoute.alias = newRoute.alias;
+								$services.vue.attemptedRoute.parameters = newParameters;
 								return {
 									alias: "login"
 								}
@@ -118,7 +120,8 @@ application.initialize = function() {
 					el: "body",
 					data: function() {
 						return {
-							route: null
+							route: null,
+							attemptedRoute: {}
 						}
 					}
 				});

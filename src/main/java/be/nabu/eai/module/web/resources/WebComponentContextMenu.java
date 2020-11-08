@@ -288,9 +288,10 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				
 				// set stuff in the web application
 				WebApplication application = (WebApplication) artifact;
-				if (application.getConfig().getRealm() == null) {
-					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
-				}
+				// don't set it, the runtime calculation is better
+//				if (application.getConfig().getRealm() == null) {
+//					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
+//				}
 				if (application.getConfig().getPasswordAuthenticationService() == null) {
 					application.getConfig().setPasswordAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.passwordAuthenticator"));
 				}
