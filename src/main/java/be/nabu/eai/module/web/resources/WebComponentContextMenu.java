@@ -326,8 +326,8 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getDeviceValidatorService() == null) {
 					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
 				}
-				if (application.getConfig().getFeatureTestingRole() == null || application.getConfig().getFeatureTestingRole().isEmpty()) {
-					application.getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
+				if (application.getConfig().getTestRole() == null || application.getConfig().getTestRole().isEmpty()) {
+					application.getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
 				
 				// update the CMS configuration
@@ -407,8 +407,8 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 					}
 				}
 				
-				if (((WebApplication) artifact).getConfig().getFeatureTestingRole() == null || ((WebApplication) artifact).getConfig().getFeatureTestingRole().isEmpty()) {
-					((WebApplication) artifact).getConfig().setFeatureTestingRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
+				if (((WebApplication) artifact).getConfig().getTestRole() == null || ((WebApplication) artifact).getConfig().getTestRole().isEmpty()) {
+					((WebApplication) artifact).getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
 				
 				for (String component : componentsToLoad) {
@@ -428,8 +428,8 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			}
 			ManageableContainer<?> pages = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages");
 			ManageableContainer<?> artifacts = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts");
-			ManageableContainer<?> homeView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/home");
-			ManageableContainer<?> indexView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/index");
+//			ManageableContainer<?> homeView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/home");
+//			ManageableContainer<?> indexView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/index");
 			ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/javascript");
 			ManageableContainer<?> css = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/css");
 			
@@ -438,9 +438,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			// copy the index file
 			copyFiles(entry.getRepository(), pages, "resources/template/basic2/index.glue");
 			// copy the home view
-			copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+//			copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
 			// copy the index view
-			copyFiles(entry.getRepository(), indexView, "resources/template/basic/index/index.tpl", "resources/template/basic/index/index.js");
+//			copyFiles(entry.getRepository(), indexView, "resources/template/basic/index/index.tpl", "resources/template/basic/index/index.js");
 			// copy the javascript glue files
 			copyFiles(entry.getRepository(), javascript, "resources/template/basic2/application.glue");
 			// copy the actual javascript files
@@ -454,6 +454,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 			
 			// the bundle
 			copyFiles(entry.getRepository(), provided, "resources/template/page/bundle.json");
+			
+			ManageableContainer<?> pageBuilderPages = (ManageableContainer<?>) ResourceUtils.mkdirs(artifacts, "pages");
+			copyFiles(entry.getRepository(), pageBuilderPages, "resources/template/page/skeleton.json");
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);

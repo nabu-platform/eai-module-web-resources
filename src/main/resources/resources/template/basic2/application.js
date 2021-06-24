@@ -9,7 +9,11 @@ application.configuration = {
 	url: "${environment('url', 'http://127.0.0.1')}",
 	host: "${environment('host', '127.0.0.1')}",
 	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0,
-	applicationLanguage: "${applicationLanguage()}"
+	applicationLanguage: "${applicationLanguage()}",
+	requestEnrichers: [],
+	interpretValues: true,
+	// if you always want the user to be logged in, the swagger will redirect to the login if the remember fails
+	alwaysLogIn: false
 };
 
 application.views = {};
@@ -66,12 +70,27 @@ application.initialize = function() {
 						return $services.router.get("notFound");
 					},
 					authorizer: function(anchor, newRoute, newParameters) {
-						if (newRoute.roles && $services.user) {
+						if (newRoute.roles && newRoute.roles.length >= 1 && $services.user) {
 							if (newRoute.roles.indexOf("$guest") < 0 && !$services.user.loggedIn) {
 								$services.vue.attemptedRoute.alias = newRoute.alias;
 								$services.vue.attemptedRoute.parameters = newParameters;
 								return {
-									alias: "login"
+									alias: "login",
+									mask: true
+								}
+							}
+							else if ($services.user.hasRole) {
+								var hasRole = false;
+								for (var i = 0; i < newRoute.roles.length; i++) {
+									if ($services.user.hasRole(newRoute.roles[i])) {
+										hasRole = true;
+										break;
+									}
+								}
+								if (!hasRole) {
+									return {
+										alias: "home"
+									}
 								}
 							}
 							else if (newRoute.roles.indexOf("$user") < 0 && $services.user.loggedIn) {
@@ -80,7 +99,7 @@ application.initialize = function() {
 								}
 							}
 						}
-						if (newRoute.actions && $services.user && $services.user.hasAction) {
+						if (newRoute.actions && newRoute.actions.length >= 1 && $services.user && $services.user.hasAction) {
 							var hasAction = false;
 							for (var i = 0; i < newRoute.actions.length; i++) {
 								if ($services.user.hasAction(newRoute.actions[i])) {
@@ -96,7 +115,7 @@ application.initialize = function() {
 						}
 					},
 					chosen: function(anchor, newRoute, newParameters) {
-						if (anchor && newRoute.slow && nabu && nabu.views && nabu.views.cms) {
+						if (anchor && (newRoute.slow || (newParameters != null && newParameters.slow)) && nabu && nabu.views && nabu.views.cms) {
 							nabu.utils.vue.render({
 								target: anchor,
 								content: new nabu.views.cms.core.Loader()
