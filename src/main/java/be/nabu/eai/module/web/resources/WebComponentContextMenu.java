@@ -304,6 +304,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getRoleService() == null) {
 					application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
 				}
+				if (application.getConfig().getBearerAuthenticator() == null) {
+					application.getConfig().setBearerAuthenticator((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.bearerAuthenticator"));
+				}
 				// choose: either role handler or permission handler
 				// a lot of simple applications only have role handler (including management screens etc)
 				// and most complex applications start simple with only the role handler, graduating to permission handler over time
