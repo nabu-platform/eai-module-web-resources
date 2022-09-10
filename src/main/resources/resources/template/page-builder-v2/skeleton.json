@@ -1,0 +1,25 @@
+{
+	"label": "Skeleton",
+	"rows": [
+		{
+			"id": 0,
+			"customId": "main",
+			"cells": [],
+			"class": null
+		}
+	],
+	"path": null,
+	"counter": 1,
+	"variables": [],
+	"query": [],
+	"actions": [],
+	"class": null,
+	"menuX": 0,
+	"menuY": 0,
+	"states": [],
+	"category": "Application",
+	"slow": false,
+	"defaultAnchor": "main",
+	"name": "skeleton",
+	"initial": true
+}

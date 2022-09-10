@@ -262,6 +262,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		return item;
 	}
 	
+	// this is now v2!
 	public static void copyPageWithCms(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
 		// copy basic template
 		// we add the component to initialize an editor and the component to add password protection (optional)
@@ -271,6 +272,84 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		// because the administrative user creator checks that no redirects are active, it plays well together
 		// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
 		copyPageTemplate(entry, publicDirectory, privateDirectory, 
+				// load cms core bits
+				"nabu.cms.core.components.main", 
+				// allow creation of an initial administrator user
+				"nabu.web.page.cms.initialAdministrator.component", 
+				// use password protect for qlty deployment etc
+				"nabu.web.core.passwordProtect",
+				// general cms integration stuff with the page builder
+				"nabu.web.page.cms.component",
+				// add in the translation service
+				"nabu.cms.core.components.translations");
+		
+		try {
+			Artifact artifact = (WebApplication) entry.getNode().getArtifact();
+			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
+				
+				// set stuff in the web application
+				WebApplication application = (WebApplication) artifact;
+				// don't set it, the runtime calculation is better
+//				if (application.getConfig().getRealm() == null) {
+//					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
+//				}
+				if (application.getConfig().getSecretGeneratorService() == null) {
+					application.getConfig().setSecretGeneratorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretGenerator"));
+				}
+				if (application.getConfig().getTypedAuthenticationService() == null) {
+					application.getConfig().setTypedAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.typedAuthenticator"));
+				}
+				if (application.getConfig().getRoleService() == null) {
+					application.getConfig().setRoleService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.roleHandler"));
+				}
+				// for now..., this will likely be absorbed by the typed authenticator
+				if (application.getConfig().getBearerAuthenticator() == null) {
+					application.getConfig().setBearerAuthenticator((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.bearerAuthenticator"));
+				}
+				// choose: either role handler or permission handler
+				// a lot of simple applications only have role handler (including management screens etc)
+				// and most complex applications start simple with only the role handler, graduating to permission handler over time
+				// this probably requires more settings anyway
+//				if (application.getConfig().getPermissionService() == null) {
+//					application.getConfig().setPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.permissionHandler"));
+//				}
+//				if (application.getConfig().getPotentialPermissionService() == null) {
+//					application.getConfig().setPotentialPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.potentialPermissionHandler"));
+//				}
+				// for now..., this will likely get absorbed by the frontend translation service
+				// this is mostly for masterdata which will need to be switched to frontend-based translations
+				if (application.getConfig().getTranslationService() == null) {
+					application.getConfig().setTranslationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.translationService"));
+				}
+				if (application.getConfig().getLanguageProviderService() == null) {
+					application.getConfig().setLanguageProviderService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.languageProvider"));
+				}
+				if (application.getConfig().getSupportedLanguagesService() == null) {
+					application.getConfig().setSupportedLanguagesService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.supportedLanguages"));
+				}
+				if (application.getConfig().getDeviceValidatorService() == null) {
+					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
+				}
+				if (application.getConfig().getTestRole() == null || application.getConfig().getTestRole().isEmpty()) {
+					application.getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
+				}
+				new WebApplicationManager().save((ResourceEntry) entry, application);
+			}
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void copyPagev1WithCms(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory) {
+		// copy basic template
+		// we add the component to initialize an editor and the component to add password protection (optional)
+		// the order is somewhat important:
+		// because external components do a promote() on preprocessors, the last components are triggered first
+		// we first want to pass by the password protect (if any), and only then set an administrative user
+		// because the administrative user creator checks that no redirects are active, it plays well together
+		// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
+		copyPagev1Template(entry, publicDirectory, privateDirectory, 
 				// load cms
 				"nabu.cms.core.components.main", 
 				// allow creation of an initial administrator user
@@ -382,7 +461,92 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		return item;
 	}
 	
+	// now v2!
 	public static void copyPageTemplate(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory, String...components) {
+		try {
+			Artifact artifact = entry.getNode().getArtifact();
+			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
+				List<String> componentsToLoad = new ArrayList<String>();
+				if (components != null && components.length > 0) {
+					componentsToLoad.addAll(Arrays.asList(components));
+				}
+				// always need the core (contains the resolve, the index and javascript pages etc)
+				componentsToLoad.add("nabu.web.core.components");
+				componentsToLoad.add("nabu.web.page.core.v2.component");
+				componentsToLoad.add("nabu.web.page.data.v2.component");
+				
+				List<String> loaded = new ArrayList<String>();
+				
+				// close the web application
+				MainController.getInstance().close(artifact.getId());
+				List<WebFragment> webFragments = ((WebApplication) artifact).getConfiguration().getWebFragments();
+				if (webFragments == null) {
+					webFragments = new ArrayList<WebFragment>();
+					((WebApplication) artifact).getConfiguration().setWebFragments(webFragments);
+				}
+				for (WebFragment fragment : webFragments) {
+					if (fragment != null) {
+						loaded.add(fragment.getId());
+					}
+				}
+				
+				if (((WebApplication) artifact).getConfig().getTestRole() == null || ((WebApplication) artifact).getConfig().getTestRole().isEmpty()) {
+					((WebApplication) artifact).getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
+				}
+				
+				for (String component : componentsToLoad) {
+					if (!loaded.contains(component)) {
+						Entry fragmentEntry = entry.getRepository().getEntry(component);
+						if (fragmentEntry != null) {
+							webFragments.add((WebFragment) fragmentEntry.getNode().getArtifact());
+						}
+						else {
+							System.out.println("Skipping non-existent component: " + component);
+						}
+					}
+				}
+				// save the changes
+				new WebApplicationManager().save((ResourceEntry) entry, (WebApplication) artifact);
+				
+			}
+			ManageableContainer<?> pages = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages");
+			ManageableContainer<?> artifacts = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts");
+//			ManageableContainer<?> homeView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/home");
+//			ManageableContainer<?> indexView = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "artifacts/views/index");
+			ManageableContainer<?> javascript = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/javascript");
+			ManageableContainer<?> css = (ManageableContainer<?>) ResourceUtils.mkdirs(publicDirectory, "pages/resources/css");
+			
+			ManageableContainer<?> provided = (ManageableContainer<?>) ResourceUtils.mkdirs(privateDirectory, "provided");
+			
+			// copy the index file
+			copyFiles(entry.getRepository(), pages, "resources/template/page-builder-v2/index.glue");
+			// copy the home view
+//			copyFiles(entry.getRepository(), homeView, "resources/template/basic/home/home.tpl", "resources/template/basic/home/home.js");
+			// copy the index view
+//			copyFiles(entry.getRepository(), indexView, "resources/template/basic/index/index.tpl", "resources/template/basic/index/index.js");
+			// copy the javascript glue files
+			copyFiles(entry.getRepository(), javascript, "resources/template/page-builder-v2/javascript/application.glue");
+			// copy the actual javascript files
+			copyFiles(entry.getRepository(), artifacts, "resources/template/page-builder-v2/application.js",
+					"resources/template/page-builder-v2/swagger.js",
+					"resources/template/page-builder-v2/web.js",
+					"resources/template/page-builder-v2/mobile.js",
+					"resources/template/page-builder-v2/routes.js");
+			// copy the css glue file
+			copyFiles(entry.getRepository(), css, "resources/template/page-builder-v2/css/application.glue");
+			
+			// the bundle
+			copyFiles(entry.getRepository(), provided, "resources/template/page-builder-v2/bundle.json");
+			
+			ManageableContainer<?> pageBuilderPages = (ManageableContainer<?>) ResourceUtils.mkdirs(artifacts, "pages");
+			copyFiles(entry.getRepository(), pageBuilderPages, "resources/template/page-builder-v2/skeleton.json");
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void copyPagev1Template(Entry entry, final ManageableContainer<?> publicDirectory, final ManageableContainer<?> privateDirectory, String...components) {
 		try {
 			Artifact artifact = entry.getNode().getArtifact();
 			if (artifact instanceof WebApplication && entry instanceof ResourceEntry) {
