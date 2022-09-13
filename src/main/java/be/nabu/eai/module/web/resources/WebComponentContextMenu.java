@@ -272,6 +272,10 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		// because the administrative user creator checks that no redirects are active, it plays well together
 		// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
 		copyPageTemplate(entry, publicDirectory, privateDirectory, 
+				// add environment loading to support optimized loads
+				// only make this standard once we can make the optimized boolean standard
+//				"nabu.web.core.environment",
+				
 				// load cms core bits
 				"nabu.cms.core.components.main", 
 				// allow creation of an initial administrator user

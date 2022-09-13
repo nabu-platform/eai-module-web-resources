@@ -6,15 +6,23 @@ application.configuration = {
 		http: "${when(environment('secure'), 'https', 'http')}",
 		ws: "${when(environment('secure'), 'wss', 'ws')}"
 	},
-	url: "${environment('url', 'http://127.0.0.1')}",
-	host: "${environment('host', '127.0.0.1')}",
+	url: "${when(environment('optimized') == true, 'unavailable', environment('url', 'http://127.0.0.1'))}",
+	host: "${when(environment('optimized') == true, 'unavailable', environment('host', '127.0.0.1'))}",
+	root: "${when(environment('optimized') == true, 'unavailable', server.root())}",
+	cookiePath: "${when(environment('optimized') == true, 'unavailable', environment('cookiePath'))}",
 	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0,
-	applicationLanguage: "${applicationLanguage()}",
+	development: false,
+	applicationLanguage: ${when(environment('optimized') == true, '"unavailable"', when(applicationLanguage() != null, '"' + applicationLanguage() + '"', "null"))},
 	requestEnrichers: [],
 	interpretValues: true,
 	// if you always want the user to be logged in, the swagger will redirect to the login if the remember fails
 	alwaysLogIn: false
 };
+
+if (application.configuration.root == "unavailable") {
+	var base = document.head.querySelector("base");
+	application.configuration.root = base ? base.getAttribute("href") : "/";
+}
 
 application.views = {};
 application.components = {};
