@@ -274,18 +274,20 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		copyPageTemplate(entry, publicDirectory, privateDirectory, 
 				// add environment loading to support optimized loads
 				// only make this standard once we can make the optimized boolean standard
-//				"nabu.web.core.environment",
-				
+				"nabu.web.core.environment",
 				// load cms core bits
-				"nabu.cms.core.components.main", 
+				"nabu.cms.core.api.v2.web.security.component",
+				"nabu.cms.core.components.masterdata",
+				// add in the translation service
+				"nabu.cms.core.components.translations",
 				// allow creation of an initial administrator user
 				"nabu.web.page.cms.initialAdministrator.component", 
 				// use password protect for qlty deployment etc
 				"nabu.web.core.passwordProtect",
+				// pretty standard these days...
+				"nabu.cms.oauth2.client.web.component");
 				// general cms integration stuff with the page builder
-				"nabu.web.page.cms.component",
-				// add in the translation service
-				"nabu.cms.core.components.translations");
+//				"nabu.web.page.cms.component"
 		
 		try {
 			Artifact artifact = (WebApplication) entry.getNode().getArtifact();
@@ -297,9 +299,21 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 //				if (application.getConfig().getRealm() == null) {
 //					application.getConfig().setRealm(artifact.getId().replaceAll("^([^.]+).*", "$1"));
 //				}
-				if (application.getConfig().getSecretGeneratorService() == null) {
-					application.getConfig().setSecretGeneratorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretGenerator"));
+//				if (application.getConfig().getSecretGeneratorService() == null) {
+//					application.getConfig().setSecretGeneratorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.secretGenerator"));
+//				}
+				application.getConfig().setOptimizedLoad(true);
+				application.getConfig().setHtml5Mode(true);
+				application.getConfig().setStateless(true);
+				
+				// nabu.authentication.temporary.providers.temporaryAuthenticator
+				if (application.getConfig().getTemporaryAuthenticator() == null) {
+					application.getConfig().setTemporaryAuthenticator((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.temporaryAuthenticator"));
 				}
+				if (application.getConfig().getTemporaryAuthenticationGenerator() != null) {
+					application.getConfig().setTemporaryAuthenticationGenerator((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.newTemporaryLogin"));
+				}
+				
 				if (application.getConfig().getTypedAuthenticationService() == null) {
 					application.getConfig().setTypedAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.typedAuthenticator"));
 				}
@@ -308,7 +322,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				}
 				// for now..., this will likely be absorbed by the typed authenticator
 				if (application.getConfig().getBearerAuthenticator() == null) {
-					application.getConfig().setBearerAuthenticator((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.bearerAuthenticator"));
+					application.getConfig().setBearerAuthenticator((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.opaqueAuthenticator"));
 				}
 				// choose: either role handler or permission handler
 				// a lot of simple applications only have role handler (including management screens etc)
