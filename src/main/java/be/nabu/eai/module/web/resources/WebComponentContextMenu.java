@@ -276,7 +276,12 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				// only make this standard once we can make the optimized boolean standard
 				"nabu.web.core.environment",
 				// load cms core bits
-				"nabu.cms.core.api.v2.web.security.component",
+				"nabu.cms.core.v2.security.web.component",
+				// the loader
+				"nabu.web.core.loader",
+				// standard language stuff
+				"nabu.cms.core.v2.language",
+				// masterdata
 				"nabu.cms.core.components.masterdata",
 				// add in the translation service
 				"nabu.cms.core.components.translations",
