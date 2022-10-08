@@ -280,11 +280,11 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				// the loader
 				"nabu.web.core.loader",
 				// standard language stuff
-				"nabu.cms.core.v2.language",
+				"nabu.cms.core.v2.language.componnt",
 				// masterdata
-				"nabu.cms.core.components.masterdata",
+				"nabu.cms.core.v2.masterdata.component",
 				// add in the translation service
-				"nabu.cms.core.components.translations",
+				"nabu.cms.core.v2.translation.component",
 				// allow creation of an initial administrator user
 				"nabu.web.page.cms.initialAdministrator.component", 
 				// use password protect for qlty deployment etc
@@ -315,7 +315,7 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getTemporaryAuthenticator() == null) {
 					application.getConfig().setTemporaryAuthenticator((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.temporaryAuthenticator"));
 				}
-				if (application.getConfig().getTemporaryAuthenticationGenerator() != null) {
+				if (application.getConfig().getTemporaryAuthenticationGenerator() == null) {
 					application.getConfig().setTemporaryAuthenticationGenerator((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.newTemporaryLogin"));
 				}
 				
@@ -350,9 +350,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getSupportedLanguagesService() == null) {
 					application.getConfig().setSupportedLanguagesService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.translation.supportedLanguages"));
 				}
-				if (application.getConfig().getDeviceValidatorService() == null) {
-					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
-				}
+//				if (application.getConfig().getDeviceValidatorService() == null) {
+//					application.getConfig().setDeviceValidatorService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.deviceValidator"));
+//				}
 				if (application.getConfig().getTestRole() == null || application.getConfig().getTestRole().isEmpty()) {
 					application.getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
