@@ -25,6 +25,7 @@ import be.nabu.libs.resources.api.ManageableContainer;
 import be.nabu.libs.resources.api.Resource;
 import be.nabu.libs.resources.api.WritableResource;
 import be.nabu.libs.services.api.DefinedService;
+import be.nabu.libs.services.pojo.POJOUtils;
 import be.nabu.libs.types.DefinedTypeResolverFactory;
 import be.nabu.libs.types.api.ComplexContent;
 import be.nabu.libs.types.api.ComplexType;
@@ -271,26 +272,28 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 		// we first want to pass by the password protect (if any), and only then set an administrative user
 		// because the administrative user creator checks that no redirects are active, it plays well together
 		// if you reverse them, it still works as the password protect is called after the administrative and overwrites it, you just get a slightly ugly redirect at the end
+		// we are adding most of the interesting ones to api artifact now in another generation step
+		// the problem is, we don't want to include version numbers etc in the components but they can't exist at the root either, they must be added under /api/*. there should not be two versions of security (v2 and v3 for example) but only the latest in a typical web application at least
 		copyPageTemplate(entry, publicDirectory, privateDirectory, 
 				// add environment loading to support optimized loads
 				// only make this standard once we can make the optimized boolean standard
 				"nabu.web.core.environment",
 				// load cms core bits
-				"nabu.cms.core.v2.security.web.component",
+//				"nabu.cms.core.v2.security.web.component",
 				// the loader
 				"nabu.web.core.loader",
 				// standard language stuff
-				"nabu.cms.core.v2.language.componnt",
+//				"nabu.cms.core.v2.language.component",
 				// masterdata
-				"nabu.cms.core.v2.masterdata.component",
+//				"nabu.cms.core.v2.masterdata.component",
 				// add in the translation service
-				"nabu.cms.core.v2.translation.component",
+//				"nabu.cms.core.v2.translation.component",
 				// allow creation of an initial administrator user
-				"nabu.web.page.cms.initialAdministrator.component", 
+				"nabu.cms.core.v2.security.initial.component", 
 				// use password protect for qlty deployment etc
-				"nabu.web.core.passwordProtect",
+				"nabu.web.core.passwordProtect");
 				// pretty standard these days...
-				"nabu.cms.oauth2.client.web.component");
+//				"nabu.cms.oauth2.client.web.component");
 				// general cms integration stuff with the page builder
 //				"nabu.web.page.cms.component"
 		
@@ -333,12 +336,37 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				// a lot of simple applications only have role handler (including management screens etc)
 				// and most complex applications start simple with only the role handler, graduating to permission handler over time
 				// this probably requires more settings anyway
-//				if (application.getConfig().getPermissionService() == null) {
-//					application.getConfig().setPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.permissionHandler"));
+				if (application.getConfig().getPermissionService() == null) {
+					application.getConfig().setPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.permissionHandler"));
+				}
+				if (application.getConfig().getPotentialPermissionService() == null) {
+					application.getConfig().setPotentialPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.potentialPermissionHandler"));
+				}
+				
+				// rate limiting
+//				if (((WebApplication) artifact).getConfig().getRateLimitChecker() == null) {
+//					((WebApplication) artifact).getConfig().setRateLimitChecker((DefinedService) entry.getRepository().resolve("nabu.web.application.providers.rateLimit.database.rateLimitCheck"));
 //				}
-//				if (application.getConfig().getPotentialPermissionService() == null) {
-//					application.getConfig().setPotentialPermissionService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.potentialPermissionHandler"));
+//				if (((WebApplication) artifact).getConfig().getRateLimitLogger() == null) {
+//					((WebApplication) artifact).getConfig().setRateLimitLogger((DefinedService) entry.getRepository().resolve("nabu.web.application.providers.rateLimit.database.rateLimitLog"));
 //				}
+//				if (((WebApplication) artifact).getConfig().getRateLimitSettings() == null) {
+//					((WebApplication) artifact).getConfig().setRateLimitSettings((DefinedService) entry.getRepository().resolve("nabu.web.application.providers.rateLimit.database.rateLimitSettings"));
+//				}
+				
+				// TODO: should dynamically look up cors and rate limiting providers and plug them in
+//				List<DefinedService> retain = new ArrayList<DefinedService>();
+//				for (DefinedService service : entry.getRepository().getArtifacts(DefinedService.class)) {
+//					if (POJOUtils.isImplementation(service, Method)) {
+//						retain.add(service);
+//					}
+//				}
+//				// CORS
+//				if (((WebApplication) artifact).getConfig().getCorsChecker() == null) {
+//					
+//					((WebApplication) artifact).getConfig().setCorsChecker((DefinedService) entry.getRepository().resolve("nabu.web.application.providers.cors.database.corsChecker"));
+//				}
+				
 				// for now..., this will likely get absorbed by the frontend translation service
 				// this is mostly for masterdata which will need to be switched to frontend-based translations
 				if (application.getConfig().getTranslationService() == null) {
@@ -495,8 +523,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				}
 				// always need the core (contains the resolve, the index and javascript pages etc)
 				componentsToLoad.add("nabu.web.core.components");
-				componentsToLoad.add("nabu.web.page.core.v2.component");
-				componentsToLoad.add("nabu.web.page.data.v2.component");
+				// also in api package now...
+//				componentsToLoad.add("nabu.web.page.core.v2.component");
+//				componentsToLoad.add("nabu.web.page.data.v2.component");
 				
 				List<String> loaded = new ArrayList<String>();
 				

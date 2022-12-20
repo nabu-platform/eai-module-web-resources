@@ -8,7 +8,8 @@ application.configuration = {
 	},
 	url: "${when(environment('optimized') == true, 'unavailable', environment('url', 'http://127.0.0.1'))}",
 	host: "${when(environment('optimized') == true, 'unavailable', environment('host', '127.0.0.1'))}",
-	root: "${when(environment('optimized') == true, 'unavailable', server.root())}",
+	// we need at least the root to be correct to get the correct swagger.json and thus the correct environment parameters
+	root: "${server.root()}",
 	cookiePath: "${when(environment('optimized') == true, 'unavailable', environment('cookiePath'))}",
 	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0,
 	development: false,
@@ -78,10 +79,39 @@ application.initialize = function() {
 						return $services.router.get("notFound");
 					},
 					authorizer: function(anchor, newRoute, newParameters) {
-						if (newRoute.roles && newRoute.roles.length >= 1 && $services.user) {
-							if (newRoute.roles.indexOf("$guest") < 0 && !$services.user.loggedIn) {
+						var rolesToCheck = null;
+						
+						// we want to check not only the roles on the target page, but also the parents
+						// this allows you to set for instance a $user requirement on a skeleton
+						var toCheck = newRoute;
+						while (toCheck) {
+							if (toCheck.roles) {
+								// if we have no role restrictions yet, just use them
+								if (rolesToCheck == null) {
+									rolesToCheck = toCheck.roles;
+								}
+								// otherwise, we need to find the common roles
+								else {
+									rolesToCheck = rolesToCheck.filter(function(x) {
+										return toCheck.roles.indexOf(x) >= 0;
+									});
+								}
+							}
+							// if we have parents, also check their roles
+							if (toCheck.parent) {
+								toCheck = $services.router.get(toCheck.parent);
+							}
+							else {
+								break;
+							}
+						}
+						
+						if (rolesToCheck && rolesToCheck.length >= 1 && $services.user) {
+							if (rolesToCheck.indexOf("$guest") < 0 && !$services.user.loggedIn) {
 								$services.vue.attemptedRoute.alias = newRoute.alias;
 								$services.vue.attemptedRoute.parameters = newParameters;
+								// put it in local storage for later use
+								localStorage.setItem("redirect-to", window.location.toString());
 								return {
 									alias: "login",
 									mask: true
@@ -89,8 +119,8 @@ application.initialize = function() {
 							}
 							else if ($services.user.hasRole) {
 								var hasRole = false;
-								for (var i = 0; i < newRoute.roles.length; i++) {
-									if ($services.user.hasRole(newRoute.roles[i])) {
+								for (var i = 0; i < rolesToCheck.length; i++) {
+									if ($services.user.hasRole(rolesToCheck[i])) {
 										hasRole = true;
 										break;
 									}
@@ -101,7 +131,7 @@ application.initialize = function() {
 									}
 								}
 							}
-							else if (newRoute.roles.indexOf("$user") < 0 && $services.user.loggedIn) {
+							else if (rolesToCheck.indexOf("$user") < 0 && $services.user.loggedIn) {
 								return {
 									alias: "home"
 								}
@@ -123,16 +153,18 @@ application.initialize = function() {
 						}
 					},
 					chosen: function(anchor, newRoute, newParameters) {
-						if (anchor && (newRoute.slow || (newParameters != null && newParameters.slow)) && nabu && nabu.views && nabu.views.cms) {
+						if (anchor && (newRoute.slow || (newParameters != null && newParameters.slow))) {
+							
 							nabu.utils.vue.render({
 								target: anchor,
-								content: new nabu.views.cms.core.Loader()
+								content: "<div class='page-loader-inline-container'><div class='page-loader'></div></div>"
 							});
 						}	
 					},
 					enter: function(anchor, newRoute, newParameters, newRouteReturn, mask) {
 						if (!mask && newRoute.url) {
 							$services.vue.route = newRoute.alias;
+							$services.vue.parameters = newParameters;
 							$services.page.chosenRoute = newRoute.alias;
 							// reset scroll
 							// document.body.scrollTop = 0;
@@ -149,6 +181,7 @@ application.initialize = function() {
 					data: function() {
 						return {
 							route: null,
+							parameters: null,
 							attemptedRoute: {}
 						}
 					}
