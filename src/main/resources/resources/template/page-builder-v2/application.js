@@ -166,6 +166,7 @@ application.initialize = function() {
 							$services.vue.route = newRoute.alias;
 							$services.vue.parameters = newParameters;
 							$services.page.chosenRoute = newRoute.alias;
+							$services.vue.lastRoute = newRoute;
 							// reset scroll
 							// document.body.scrollTop = 0;
 							window.scrollTo(0, 0);
@@ -182,7 +183,25 @@ application.initialize = function() {
 						return {
 							route: null,
 							parameters: null,
+							lastRoute: null,
 							attemptedRoute: {}
+						}
+					},
+					methods: {
+						updateUrlParameter: function(key, value) {
+							if (this.lastRoute != null) {
+								var parameters = this.lastRoute.parameters ? nabu.utils.objects.clone(this.lastRoute.parameters) : {};
+								parameters[key] = value;
+								var url = this.$services.router.router.template(this.lastRoute.alias, parameters);
+								// only update if we have _some_ url
+								if (url) {
+									this.$services.router.router.updateUrl(
+										this.lastRoute.alias,
+										url,
+										parameters,
+										this.lastRoute.query);
+								}
+							}
 						}
 					}
 				});

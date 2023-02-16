@@ -321,6 +321,9 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (application.getConfig().getTemporaryAuthenticationGenerator() == null) {
 					application.getConfig().setTemporaryAuthenticationGenerator((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.newTemporaryLogin"));
 				}
+				if (application.getConfig().getTemporaryAuthenticationRevoker() == null) {
+					application.getConfig().setTemporaryAuthenticationRevoker((DefinedService) entry.getRepository().resolve("nabu.authentication.temporary.providers.revokeTemporaryAuthentication"));
+				}
 				
 				if (application.getConfig().getTypedAuthenticationService() == null) {
 					application.getConfig().setTypedAuthenticationService((DefinedService) entry.getRepository().resolve("nabu.cms.core.providers.security.typedAuthenticator"));
