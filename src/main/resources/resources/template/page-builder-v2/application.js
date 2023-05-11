@@ -81,6 +81,13 @@ application.initialize = function() {
 					authorizer: function(anchor, newRoute, newParameters) {
 						var rolesToCheck = null;
 						
+						// if the page is login, we always allow it
+						// if we would conclude that you can't access it, we would need to redirect to...login?
+						// this ends up routing endlessly
+						if (newRoute.alias == "login") {
+							return true;
+						}
+						
 						// we want to check not only the roles on the target page, but also the parents
 						// this allows you to set for instance a $user requirement on a skeleton
 						var toCheck = newRoute;
