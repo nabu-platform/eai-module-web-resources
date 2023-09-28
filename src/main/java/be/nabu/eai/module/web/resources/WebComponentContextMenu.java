@@ -526,9 +526,13 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				}
 				// always need the core (contains the resolve, the index and javascript pages etc)
 				componentsToLoad.add("nabu.web.core.components");
+				
 				// also in api package now...
 //				componentsToLoad.add("nabu.web.page.core.v2.component");
 //				componentsToLoad.add("nabu.web.page.data.v2.component");
+				
+				// a dynamic robots generator
+				componentsToLoad.add("nabu.web.robots.rest.component");
 				
 				List<String> loaded = new ArrayList<String>();
 				
@@ -548,7 +552,6 @@ public class WebComponentContextMenu implements EntryContextMenuProvider {
 				if (((WebApplication) artifact).getConfig().getTestRole() == null || ((WebApplication) artifact).getConfig().getTestRole().isEmpty()) {
 					((WebApplication) artifact).getConfig().setTestRole(new ArrayList<String>(Arrays.asList("tester", "editor")));
 				}
-				
 				for (String component : componentsToLoad) {
 					if (!loaded.contains(component)) {
 						Entry fragmentEntry = entry.getRepository().getEntry(component);
