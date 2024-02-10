@@ -8,8 +8,7 @@ application.configuration = {
 	},
 	url: "${when(environment('optimized') == true, 'unavailable', environment('url', 'http://127.0.0.1'))}",
 	host: "${when(environment('optimized') == true, 'unavailable', environment('host', '127.0.0.1'))}",
-	// we need at least the root to be correct to get the correct swagger.json and thus the correct environment parameters
-	root: "${server.root()}",
+	root: "${when(environment('optimized') == true, 'unavailable', server.root())}",
 	cookiePath: "${when(environment('optimized') == true, 'unavailable', environment('cookiePath'))}",
 	mobile: navigator.userAgent.toLowerCase().indexOf("mobi") >= 0,
 	development: false,
