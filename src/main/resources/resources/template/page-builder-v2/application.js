@@ -169,6 +169,8 @@ application.initialize = function() {
 					},
 					enter: function(anchor, newRoute, newParameters, newRouteReturn, mask) {
 						if (!mask && newRoute.url) {
+							// keep previous state so we know where we came from
+							$services.vue.previousRoute = $services.vue.lastRoute;
 							$services.vue.route = newRoute.alias;
 							$services.vue.parameters = newParameters;
 							$services.page.chosenRoute = newRoute.alias;
